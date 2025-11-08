@@ -106,4 +106,66 @@ public class Utilities {
         }
     }
 
+    public static String obtainEmail() {
+        String pattern = "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$";
+
+        while (true) {
+            System.out.print("Email: ");
+            String email = scanner.nextLine().trim();// .trim() elimina espacios en blanco al inicio y al final del texto introducido.
+
+            if (Pattern.matches(pattern, email)) {
+                return email;
+            } else {
+                System.out.println("Invalid email. Try again.");
+            }
+        }
+    }
+
+    public static String obtainDate(String label) {
+        String datePattern = "\\d{4}-\\d{2}-\\d{2}";
+
+        while (true) {
+            System.out.print(label + " (yyyy-MM-dd): ");
+            // .trim() evita que espacios extra hagan fallar la validación
+            String dob = scanner.nextLine().trim();
+
+            if (Pattern.matches(datePattern, dob)) {
+                return dob;
+            } else {
+                System.out.println("Invalid date format. Please use yyyy-MM-dd.");
+            }
+        }
+    }
+
+    public static boolean obtainYesNo(String label) {
+        while (true) {
+            System.out.print(label + " (y/n): ");
+            String s = scanner.nextLine().trim().toLowerCase();
+
+            if (s.equals("y")) return true;
+            if (s.equals("n")) return false;
+
+            System.out.println("Please enter y or n.");
+        }
+    }//Solicita al usuario una respuesta de tipo Sí/No y devuelve un booleano.
+    //Garantiza que solo se acepten valores válidos ('y' o 'n'), evitando entradas incorrectas.
+
+    public static int obtainIntInRange(String label, int min, int max) {
+        while (true) {
+            System.out.print(label + " (" + min + "-" + max + "): ");
+            String input = scanner.nextLine().trim();
+
+            try {
+                int value = Integer.parseInt(input);
+                if (value >= min && value <= max) {
+                    return value;
+                }
+            } catch (NumberFormatException ignored) {}
+
+            System.out.println("Please enter a number between " + min + " and " + max + ".");
+        }
+    }//Obtiene un número introducido por el usuario y valida que esté dentro de un rango específico.
+    //Se utiliza para valores de síntomas (por ejemplo, de 0 a 3) evitando errores en la entrada.
+
+
 }

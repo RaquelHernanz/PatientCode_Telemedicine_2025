@@ -1,13 +1,28 @@
 package menu;
 
-import utilities.Utilities;
+import pojos.Appointment;
+import pojos.Measurement;
+import pojos.Patient;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Scanner;
+
+import pojos.Symptoms;
+import utilities.Utilities;
 
 public class PatientMenu {
 
     private static Scanner scanner = new Scanner(System.in);
-    
+    private static String loggedEmail = null; // quién ha iniciado sesión
+    private static java.util.Map<String,String> userPwdHash = new java.util.HashMap<>(); // email -> hash(password)
+
+    public static void main(String[] args) {
+        menu();
+    }
+
     private static void menu() {
         System.out.println("\nPatient App");
         while (true) {
@@ -15,17 +30,24 @@ public class PatientMenu {
             System.out.println("0. Exit");
             System.out.println("1. Register"); //si no tienes cuenta, te registras
             System.out.println("2. Log in"); //si tienes cuenta, entras con tu cuenta
-            System.out.println("\nChoose an option:");
+            System.out.print("\nChoose an option: ");
 
-            int option = scanner.nextInt(); //leer opción
-            scanner.nextLine();
+            String input = scanner.nextLine();   // leemos como texto
+            int option;
+
+            try {
+                option = Integer.parseInt(input); // convertimos a número
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid number.");
+                continue; // vuelve al menú sin romper nada
+            }
 
             switch (option) {
                 case 1:
                     registerPatient();
                     break;
                 case 2:
-                 //   logIn();
+                    login();
                     break;
                 case 0:
                     System.out.println("Exit");
@@ -36,62 +58,131 @@ public class PatientMenu {
         }
     }
 
-        private static void registerPatient() {
-            System.out.println("Enter your personal details to register. ");
+    private static void registerPatient() {
+        System.out.println();
+        System.out.println("Register");
 
-            String email;
-            do {
-                System.out.println("Email: "); //pide el email
-                email = scanner.nextLine();
-            } while (!Utilities.readEmail(email)); // si no es correcto, te lo vuelve a pedir
+        // 1. Email (valida y devuelve el email correcto)
+        String email = Utilities.obtainEmail();
 
-            System.out.println("Password: ");
-            String password = scanner.nextLine();
-
-            System.out.println("Name: ");
-            String name = scanner.nextLine();
-
-            System.out.println("Surname: ");
-            String surname = scanner.nextLine();
-
-            // Solicitar fecha de nacimiento
-            String dob;
-            do {
-                System.out.print("Date of Birth (yyyy-MM-dd): ");
-                dob = scanner.nextLine().trim();
-                if (!Utilities.validateDateOfBirth(dob)) {
-                    System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
-                }
-            } while (!Utilities.validateDateOfBirth(dob));
-
-            //Patient new_patient = new Patient(name, surname, email, dob, new ArrayList<Appointment>(), new ArrayList<Measurement>(), new ArrayList<Symptoms>());
-
-            // Crear objeto Patient con los nuevos datos
-        /*  Patient currentPatient = new Patient(dni, password, name, surname, email, , gender, telephone, dateOfBirth);
-
-            if (ConnectionPatient.sendRegisterServer(currentPatient, password)) {
-                System.out.println("User registered with DNI: " + dni);
-                mainMenu();
-            } else {
-                System.out.println("DNI: " + dni + " is already registered. Try to login to access your account.");
-                mainMenu();
-            }*/
-
+        // 2. Comprobar si ya existe
+        if (userPwdHash.containsKey(email)) {
+            System.out.println("This email is already registered. Please log in.");
+            return;
         }
 
-        private static void loginPatient(){
+        // 3. Password (de momento guardamos tal cual, sin encriptar)
+        System.out.print("Password: ");
+        String password = scanner.nextLine().trim();
 
+        // 4. Guardar credenciales temporalmente (email -> password)
+        userPwdHash.put(email, password);
+
+        // 5. Nombre
+        System.out.print("Name: ");
+        String name = scanner.nextLine().trim();
+
+        // 6. Apellidos
+        System.out.print("Surname: ");
+        String surname = scanner.nextLine().trim();
+
+        // 7. Fecha de nacimiento (usa tu método que ya funciona)
+        String dob = Utilities.obtainDate("Date of Birth");
+         /*
+    // Crear objeto Patient con los datos introducidos por el usuario
+    Patient newPatient = new Patient(name, surname, email, dob,
+            new ArrayList<Appointment>(), new ArrayList<Measurement>(), new ArrayList<Symptoms>());
+
+    // Enviar el registro al servidor
+    if (ConnectionPatient.sendRegisterServer(newPatient, password)) {
+        System.out.println("Usuario registrado correctamente en el servidor.");
+    } else {
+        System.out.println("Este email ya existe en el servidor. Intenta iniciar sesión.");
+    }
+    */
+
+        System.out.println("Registration completed successfully.");
+    }
+
+    private static void login() {
+        System.out.println();
+        System.out.println("Log in");
+
+        // 1) Pedir email válido
+        String email = Utilities.obtainEmail();
+
+        // 2) Pedir contraseña
+        System.out.print("Password: ");
+        String password = scanner.nextLine().trim();
+
+        // 3) Comprobar en el almacenamiento temporal (HashMap)
+        String saved = userPwdHash.get(email);
+        if (saved == null) {
+            System.out.println("No account found with this email. Please register first.");
+            return;
+        }
+        if (!saved.equals(password)) {
+            System.out.println("Incorrect password. Try again.");
+            return;
         }
 
-        //Make an appointment
-        //Write a set of symptons
-        //Record a mesuarement OF EGC/EDA
-        //Send a message
-        //Select doctor
+        // 4) Marcar sesión iniciada
+        loggedEmail = email;
+        System.out.println("Login successful.");
+
+        // ESTE CÓDIGO SE UTILIZARÁ MÁS ADELANTE CUANDO SE CONECTE CON EL SERVIDOR
+    /*
+    try {
+        if (ConnectionPatient.validateLogin(email, password)) {
+            System.out.println("Login successful (server).");
+            // Cuando esté el menú interno del paciente:
+            // patientMenu();
+        } else {
+            System.out.println("Incorrect credentials on the server.");
+        }
+    } catch (Exception e) {
+        System.out.println("ERROR connecting with the server. Please try again later.");
+    }
+    */
+    }
+
+
+    //Make an appointment
+    private static void scheduleAppointment() throws Exception{
+        //
+        //		//ask for date of appointment
+        String dob;
+        do {
+            System.out.print("Date of Birth (yyyy-MM-dd): ");
+            dob = scanner.nextLine().trim();
+            if (!Utilities.validateDateOfBirth(dob)) {
+                System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
+            }
+        } while (!Utilities.validateDateOfBirth(dob));
+        //		//description
+        //		System.out.println("Description: ");
+        //		String description = reader.readLine();
+        //		//doctor
+        //		doctors = doctormanager.getListOfDoctors();
+        //		System.out.println("Doctors available: ");
+        //		for(Doctor d : doctors) {
+        //			System.out.println(d.toString());
+        //		}
+        //		System.out.println("Enter doctor's id: ");
+        //		Integer d_id = Integer.parseInt(reader.readLine());
+        //		d = doctormanager.searchDoctorById(d_id);
+        //		//patient
+        //		p = patientmanager.getPatientByEmail(email);
+        //
+        //		Appointment a = new Appointment(date, description, d, p);
+        //		amanager.addAppointment(a);
+    }
+    //
+
+    //Write a set of symptons
+    //Record a mesuarement OF EGC/EDA
+    //Send a message
+    //Select doctor
 
 
 }
-    
-    
-
-
