@@ -125,7 +125,7 @@ public class Utilities {
         String datePattern = "\\d{4}-\\d{2}-\\d{2}";
 
         while (true) {
-            System.out.print(label + " (yyyy-MM-dd): ");
+            System.out.print(label + " (yyyy-MM-dd): "); // imprime: Date of birth + formato
             // .trim() evita que espacios extra hagan fallar la validación
             String dob = scanner.nextLine().trim();
 

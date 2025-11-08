@@ -62,10 +62,10 @@ public class PatientMenu {
         System.out.println();
         System.out.println("Register");
 
-        // 1. Email (valida y devuelve el email correcto)
+        // 1. pide el email, lo valida y lo guarda
         String email = Utilities.obtainEmail();
 
-        // 2. Comprobar si ya existe
+        // 2. Comprueba si el email ya existe y si ya existe le dice que haga log in en vez de register
         if (userPwdHash.containsKey(email)) {
             System.out.println("This email is already registered. Please log in.");
             return;
@@ -73,10 +73,11 @@ public class PatientMenu {
 
         // 3. Password (de momento guardamos tal cual, sin encriptar)
         System.out.print("Password: ");
-        String password = scanner.nextLine().trim();
+        String password = scanner.nextLine().trim(); //quita espacios en blanco al principio y al final
 
         // 4. Guardar credenciales temporalmente (email -> password)
         userPwdHash.put(email, password);
+        // userPwdHash.put("ana@gmail.com", "1234"); --> formato (valor, clave)
 
         // 5. Nombre
         System.out.print("Name: ");
@@ -86,12 +87,18 @@ public class PatientMenu {
         System.out.print("Surname: ");
         String surname = scanner.nextLine().trim();
 
-        // 7. Fecha de nacimiento (usa tu método que ya funciona)
+        // 7. Fecha de nacimiento
         String dob = Utilities.obtainDate("Date of Birth");
          /*
     // Crear objeto Patient con los datos introducidos por el usuario
     Patient newPatient = new Patient(name, surname, email, dob,
             new ArrayList<Appointment>(), new ArrayList<Measurement>(), new ArrayList<Symptoms>());
+
+
+    // if (!connection.Connection.isConnected()) {
+    //        connection.Connection.connectToServer();
+    //    }
+
 
     // Enviar el registro al servidor
     if (ConnectionPatient.sendRegisterServer(newPatient, password)) {
