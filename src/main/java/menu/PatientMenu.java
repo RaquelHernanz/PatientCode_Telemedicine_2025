@@ -18,6 +18,14 @@ public class PatientMenu {
     private static Scanner scanner = new Scanner(System.in);
     private static String loggedEmail = null; // quién ha iniciado sesión
     private static java.util.Map<String,String> userPwdHash = new java.util.HashMap<>(); // email -> hash(password)
+    // Últimos síntomas guardados
+    private static String lastSymptomsDescription;
+    private static java.time.LocalDate lastSymptomsDate;
+    private static java.time.LocalDateTime lastSymptomsHour;
+    // Doctor seleccionado por el paciente (por ahora será un String, luego será Doctor)
+    private static String selectedDoctor = null;
+    // Lista de mensajes enviados por el paciente (en memoria por ahora)
+    private static java.util.List<String> sentMessages = new java.util.ArrayList<>();
 
     public static void main(String[] args) {
         menu();
@@ -129,6 +137,7 @@ public class PatientMenu {
         // 4) Marcar sesión iniciada
         loggedEmail = email;
         System.out.println("Login successful.");
+        patientMenu();
 
         // ESTE CÓDIGO SE UTILIZARÁ MÁS ADELANTE CUANDO SE CONECTE CON EL SERVIDOR
     /*
@@ -146,43 +155,177 @@ public class PatientMenu {
     */
     }
 
-
-    //Make an appointment
-    private static void scheduleAppointment() throws Exception{
-        //
-        //		//ask for date of appointment
-        String dob;
-        do {
-            System.out.print("Date of Birth (yyyy-MM-dd): ");
-            dob = scanner.nextLine().trim();
-            if (!Utilities.validateDateOfBirth(dob)) {
-                System.out.println("Invalid date format. Please enter the date in yyyy-MM-dd format.");
+    private static void patientMenu() {
+        while (true) {
+            System.out.println();
+            System.out.println("=== Patient Menu ===");
+            System.out.println("Logged as: " + loggedEmail);
+            if (selectedDoctor != null) {
+                System.out.println("Selected doctor: " + selectedDoctor);
             }
-        } while (!Utilities.validateDateOfBirth(dob));
-        //		//description
-        //		System.out.println("Description: ");
-        //		String description = reader.readLine();
-        //		//doctor
-        //		doctors = doctormanager.getListOfDoctors();
-        //		System.out.println("Doctors available: ");
-        //		for(Doctor d : doctors) {
-        //			System.out.println(d.toString());
-        //		}
-        //		System.out.println("Enter doctor's id: ");
-        //		Integer d_id = Integer.parseInt(reader.readLine());
-        //		d = doctormanager.searchDoctorById(d_id);
-        //		//patient
-        //		p = patientmanager.getPatientByEmail(email);
-        //
-        //		Appointment a = new Appointment(date, description, d, p);
-        //		amanager.addAppointment(a);
+
+            System.out.println("0. Log out");
+            System.out.println("1. Write symptoms (free text)");
+            System.out.println("2. Select doctor");
+            System.out.println("3. Send a message to selected doctor");
+            System.out.println("4. Record ECG/EDA");
+            System.out.print("Choose an option: ");
+
+            String input = scanner.nextLine().trim();
+            switch (input) {
+                case "0" -> {
+                    System.out.println("Logging out.");
+                    loggedEmail = null;
+                    return; // volver al menú principal
+                }
+                case "1" -> writeSymptoms();
+                case "2" -> selectDoctor();
+                case "3" -> sendMessage();
+                case "4" -> System.out.println("FALTA_METODO");// recordECGorEDA_BitalinoJavaSDK();
+
+                default -> System.out.println("Invalid option. Try again.");
+            }
+        }
     }
-    //
+    // Permite al paciente escribir síntomas en texto libre y los guarda temporalmente
+    private static void writeSymptoms() {
+        // Comprobamos que haya sesión iniciada
+        if (loggedEmail == null) {
+            System.out.println("You must log in first.");
+            return;
+        }
 
-    //Write a set of symptons
-    //Record a mesuarement OF EGC/EDA
-    //Send a message
-    //Select doctor
+        System.out.println();
+        System.out.println("Write symptoms");
 
+        String symptoms;
+        // Pedimos texto hasta que el usuario escriba algo (evitar vacío)
+        do {
+            System.out.print("Symptoms: ");
+            symptoms = scanner.nextLine().trim();
+            if (symptoms.isEmpty()) {
+                System.out.println("Please enter some text.");
+            }
+        } while (symptoms.isEmpty());
+
+        // Guardamos temporalmente (sin crear el objeto Symptoms aún)
+        lastSymptomsDescription = symptoms;
+        lastSymptomsDate = java.time.LocalDate.now();
+        lastSymptomsHour = java.time.LocalDateTime.now();
+
+        System.out.println("Symptoms saved successfully.");
+
+        // FUTURO (cuando se cargue el Patient tras login):
+        //
+        // Patient p = currentPatient;  // variable que aún no tenemos
+        // Symptoms s = new Symptoms(
+        //         lastSymptomsDescription,
+        //         lastSymptomsDate,
+        //         lastSymptomsHour,
+        //         p
+        // );
+        //
+        // Después se enviará al servidor o BD según el proyecto.
+    }
+
+    // Permite al paciente seleccionar un doctor
+    private static void selectDoctor() {
+        if (loggedEmail == null) {
+            System.out.println("You must log in first.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("Select a doctor");
+
+        // LISTA LOCAL TEMPORAL (más adelante se reemplazará por servidor)
+        String[] doctors = {
+                "Dr. Ana García - Cardiology",
+                "Dr. Luis Pérez - Family Medicine",
+                "Dr. Marta Ruiz - Cardiology"
+        };
+
+        // Mostrar lista numerada
+        for (int i = 0; i < doctors.length; i++) {
+            System.out.println((i + 1) + ". " + doctors[i]);
+        }
+
+        // Elegir opción válida
+        int option;
+        while (true) {
+            System.out.print("Choose a doctor (1-" + doctors.length + "): ");
+            String input = scanner.nextLine().trim();
+            try {
+                option = Integer.parseInt(input);
+                if (option >= 1 && option <= doctors.length) break;
+            } catch (NumberFormatException ignored) {}
+            System.out.println("Invalid option. Try again.");
+        }
+
+        // Guardamos el doctor seleccionado
+        selectedDoctor = doctors[option - 1];
+        System.out.println("Doctor selected: " + selectedDoctor);
+
+        // FUTURO (cuando haya servidor y clase Doctor):
+        //
+        // ArrayList<Doctor> doctors = ConnectionPatient.getAvailableDoctors();
+        // Doctor selected = doctors.get(option - 1);
+        // currentPatient.setDoctor(selected);
+    }
+
+    // Permite que el paciente envíe un mensaje a su doctor seleccionado
+    private static void sendMessage() {
+        // Comprobar login
+        if (loggedEmail == null) {
+            System.out.println("You must log in first.");
+            return;
+        }
+
+        // Comprobar que haya doctor seleccionado
+        if (selectedDoctor == null) {
+            System.out.println("You must select a doctor first.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("Send a message to your doctor");
+
+        String message;
+        do {
+            System.out.print("Message: ");
+            message = scanner.nextLine().trim();
+            if (message.isEmpty()) {
+                System.out.println("Please enter a message.");
+            }
+        } while (message.isEmpty());
+
+        // Crear mensaje con datos relevantes
+        String fullMessage =
+                "To: " + selectedDoctor + "\n" +
+                        "Message: " + message + "\n" +
+                        "Date: " + java.time.LocalDate.now() + " " + java.time.LocalTime.now() + "\n";
+
+        // Guardar en la lista local
+        sentMessages.add(fullMessage);
+
+        System.out.println("Message sent successfully.");
+
+        // FUTURO (cuando haya servidor):
+        //
+        // Message m = new Message(currentPatient, selectedDoctorObj, message, timestamp);
+        // ConnectionPatient.sendMessage(m);
+
+        //SI NO QUEREMOS CREAR LA CLASE MESSAGE:
+        // FUTURE (when connecting to the server):
+        // Build a string with the message to send:
+        // String msgToSend =
+        //         "SENDER: " + loggedEmail + "\n" +
+        //         "DOCTOR: " + selectedDoctor + "\n" +
+        //         "DATE: " + java.time.LocalDate.now() + "\n" +
+        //         "TIME: " + java.time.LocalTime.now() + "\n" +
+        //         "MESSAGE: " + message;
+        // Send this text to the server instead of an object
+        // ConnectionPatient.sendMessage(msgToSend);
+    }
 
 }
