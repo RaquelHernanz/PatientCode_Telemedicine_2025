@@ -119,6 +119,18 @@ public class Patient {
         this.symptoms = symptoms;
     }
 
+    public void addAppointment(Appointment appointment){
+        this.appointments.add(appointment);
+    }
+
+    public void addMeasurement(Measurement measurement){
+        this.measurements.add(measurement);
+    }
+
+    public void addSymptom(Symptoms symptom){
+        this.symptoms.add(symptom);
+    }
+
     @Override
     public String toString() {
         return "Patient{" +

@@ -1,8 +1,6 @@
 package menu;
 
-import pojos.Appointment;
-import pojos.Measurement;
-import pojos.Patient;
+import pojos.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -10,7 +8,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import pojos.Symptoms;
 import utilities.Utilities;
 
 public class PatientMenu {
@@ -239,6 +236,7 @@ public class PatientMenu {
     private static void selectDoctor() {
         if (loggedEmail == null) {
             System.out.println("You must log in first.");
+            //Se podría hacer también lanzando una excepción
             return;
         }
 
@@ -334,5 +332,87 @@ public class PatientMenu {
         // Send this text to the server instead of an object
         // ConnectionPatient.sendMessage(msgToSend);
     }
+
+    private static void patientMenu1(Patient patient) throws Exception{
+        System.out.println("\n=== Patient Menu ===");
+        System.out.println("1. Write symptoms 2. Select doctor 3. Send message  0. Log out");
+
+        do {
+            int option_menu = scanner.nextInt(); //leer opción
+            scanner.nextLine();
+            /*case "0" -> {
+                System.out.println("Logging out.");
+                loggedEmail = null;
+                return; // volver al menú principal
+            }
+            case "1" -> writeSymptoms();
+            case "2" -> selectDoctor();
+            case "3" -> sendMessage();
+            case "4" -> System.out.println("FALTA_METODO");// recordECGorEDA_BitalinoJavaSDK();
+
+            default -> System.out.println("Invalid option. Try again.");*/
+            switch (option_menu) {
+                case 1://Write symptoms
+                    writeSymptoms1(patient);
+                    break;
+                case 2://Select doctor
+                    selectDoctor();
+                    break;
+                case 3://Send message
+                    sendMessage();
+                    break;
+
+                case 0://Log out
+                    //ConnectionDoctor.closeConnection();
+                    System.out.println("Logging out...");
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+                    break;
+            }
+        }while (true);
+    }
+
+    private static void writeSymptoms1(Patient patient) throws Exception{ //Se pasa el paciente al method para añadir los síntomas
+        // Comprobamos que haya sesión iniciada
+        if (loggedEmail == null) {
+            throw new Exception("You must log in first.");//Envía una excepción si no está iniciada la sesión para
+            //que luego se gestione con try catch
+        }
+
+        System.out.println();
+        System.out.println("Write symptoms");
+
+        String symptoms;
+        // Pedimos texto hasta que el usuario escriba algo (evitar vacío)
+        do {
+            System.out.print("Symptoms: ");
+            symptoms = scanner.nextLine().trim();
+            if (symptoms.isEmpty()) {
+                System.out.println("Please enter some text.");
+            }
+        } while (symptoms.isEmpty());
+
+        // Guardamos temporalmente (sin crear el objeto Symptoms aún)
+        lastSymptomsDescription = symptoms;
+        lastSymptomsDate = java.time.LocalDate.now();
+        lastSymptomsHour = java.time.LocalDateTime.now();
+
+
+
+        Symptoms s = new Symptoms(
+                 lastSymptomsDescription,
+                 lastSymptomsDate,
+                 lastSymptomsHour,
+                 patient
+         );
+        patient.addSymptom(s); //Añade los síntomas a la lista de síntomas del paciente
+        // Después se enviará al servidor o BD según el proyecto.
+        System.out.println("Symptoms saved successfully.");
+
+    }
+
+
 
 }
