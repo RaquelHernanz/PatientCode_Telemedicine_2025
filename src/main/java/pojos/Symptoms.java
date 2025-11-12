@@ -1,27 +1,24 @@
 package pojos;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Symptoms {
     private int id;
     private String description;
-    private LocalDate date;
-    private LocalDateTime hour;
+    private LocalDateTime dateTime;
     private Patient patient;
 
-    public Symptoms(String description, LocalDate date,LocalDateTime hour, Patient patient){
+    public Symptoms(String description,LocalDateTime data_hour, Patient patient){
         this.description = description;
-        this.date = date;
-        this.hour = hour;
+        this.dateTime = data_hour;
         this.patient = patient;
     }
 
-    public Symptoms(int id, String description, LocalDate date,LocalDateTime hour, Patient patient){
+    public Symptoms(int id, String description, LocalDateTime date_hour, Patient patient){
         this.id = id;
         this.description = description;
-        this.date = date;
-        this.hour = hour;
+        this.dateTime = date_hour;
         this.patient = patient;
     }
 
@@ -49,30 +46,33 @@ public class Symptoms {
         this.patient = patient;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDateTime getDateTime() {
+        return dateTime;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public LocalDateTime getHour() {
-        return hour;
-    }
-
-    public void setHour(LocalDateTime hour) {
-        this.hour = hour;
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
     }
 
     @Override
     public String toString() {
         return "Symptoms{" +
-                "date=" + date +
+                "dateTime=" + dateTime +
                 ", id=" + id +
                 ", description='" + description + '\'' +
-                ", hour=" + hour +
                 ", patient=" + patient +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Symptoms symptoms = (Symptoms) o;
+        return id == symptoms.id && Objects.equals(description, symptoms.description) && Objects.equals(dateTime, symptoms.dateTime) && Objects.equals(patient, symptoms.patient);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, description, dateTime, patient);
     }
 }

@@ -1,6 +1,7 @@
 package pojos;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Appointment {
     private int id;
@@ -72,5 +73,17 @@ public class Appointment {
                 ", doctor=" + doctor +
                 ", patient=" + patient +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Appointment that = (Appointment) o;
+        return id == that.id && Objects.equals(date, that.date) && Objects.equals(message, that.message) && Objects.equals(doctor, that.doctor) && Objects.equals(patient, that.patient);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, date, message, doctor, patient);
     }
 }

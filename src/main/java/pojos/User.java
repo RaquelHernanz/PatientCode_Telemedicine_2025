@@ -1,5 +1,7 @@
 package pojos;
 
+import java.util.Objects;
+
 public class User {
     private String username;
     private String password;
@@ -47,6 +49,18 @@ public class User {
     public enum Role {
         DOCTOR,
         PATIENT
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(username, user.username) && Objects.equals(password, user.password) && role == user.role;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, password, role);
     }
 }
 

@@ -17,8 +17,7 @@ public class PatientMenu {
     private static java.util.Map<String,String> userPwdHash = new java.util.HashMap<>(); // email -> hash(password)
     // Últimos síntomas guardados
     private static String lastSymptomsDescription;
-    private static java.time.LocalDate lastSymptomsDate;
-    private static java.time.LocalDateTime lastSymptomsHour;
+    private static java.time.LocalDateTime lastSymptomsDateTime;
     // Doctor seleccionado por el paciente (por ahora será un String, luego será Doctor)
     private static String selectedDoctor = null;
     // Lista de mensajes enviados por el paciente (en memoria por ahora)
@@ -94,10 +93,8 @@ public class PatientMenu {
 
         // 7. Fecha de nacimiento
         String dob = Utilities.obtainDate("Date of Birth");
-         /*
-    // Crear objeto Patient con los datos introducidos por el usuario
-    Patient newPatient = new Patient(name, surname, email, dob,
-            new ArrayList<Appointment>(), new ArrayList<Measurement>(), new ArrayList<Symptoms>());
+        // Crear objeto Patient con los datos introducidos por el usuario
+        /*Patient newPatient = new Patient(name,surname, email);*/
 
 
     // if (!connection.Connection.isConnected()) {
@@ -106,7 +103,7 @@ public class PatientMenu {
 
 
     // Enviar el registro al servidor
-    if (ConnectionPatient.sendRegisterServer(newPatient, password)) {
+    /*if (ConnectionPatient.sendRegisterServer(newPatient, password)) {
         System.out.println("Usuario registrado correctamente en el servidor.");
     } else {
         System.out.println("Este email ya existe en el servidor. Intenta iniciar sesión.");
@@ -214,8 +211,7 @@ public class PatientMenu {
 
         // Guardamos temporalmente (sin crear el objeto Symptoms aún)
         lastSymptomsDescription = symptoms;
-        lastSymptomsDate = java.time.LocalDate.now();
-        lastSymptomsHour = java.time.LocalDateTime.now();
+        lastSymptomsDateTime = java.time.LocalDateTime.now();
 
         System.out.println("Symptoms saved successfully.");
 
@@ -396,15 +392,11 @@ public class PatientMenu {
 
         // Guardamos temporalmente (sin crear el objeto Symptoms aún)
         lastSymptomsDescription = symptoms;
-        lastSymptomsDate = java.time.LocalDate.now();
-        lastSymptomsHour = java.time.LocalDateTime.now();
+        lastSymptomsDateTime = java.time.LocalDateTime.now();
 
 
 
-        Symptoms s = new Symptoms(
-                 lastSymptomsDescription,
-                 lastSymptomsDate,
-                 lastSymptomsHour,
+        Symptoms s = new Symptoms(lastSymptomsDescription,lastSymptomsDateTime,
                  patient
          );
         patient.addSymptom(s); //Añade los síntomas a la lista de síntomas del paciente
@@ -412,7 +404,5 @@ public class PatientMenu {
         System.out.println("Symptoms saved successfully.");
 
     }
-
-
 
 }
