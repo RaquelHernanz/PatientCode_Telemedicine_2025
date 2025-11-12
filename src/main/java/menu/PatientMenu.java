@@ -172,7 +172,7 @@ public class PatientMenu {
             }
 
             System.out.println("0. Log out");
-            System.out.println("1. Write symptoms (free text)");
+            System.out.println("1. Write symptoms");
             System.out.println("2. Select doctor");
             System.out.println("3. Send a message to selected doctor");
             System.out.println("4. Record ECG/EDA");

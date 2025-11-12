@@ -15,6 +15,8 @@ public class Patient {
     private ArrayList<Measurement>measurements;
     private ArrayList<Symptoms> symptoms;
 
+    public Patient (){}
+
     public Patient(String name, String surname, String email, Sex sex, String phonenumber,String dob, ArrayList appointments, ArrayList measurements, ArrayList symptoms){
         this.name = name;
         this.surname = surname;

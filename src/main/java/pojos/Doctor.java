@@ -8,8 +8,10 @@ public class Doctor {
     private String surname;
     private String email;
     private String phonenumber;
-    private ArrayList patients;
-    private ArrayList appointments;
+    private ArrayList <Patient> patients;
+    private ArrayList <Appointment> appointments;
+
+    public Doctor (){}
 
     public Doctor(String name, String surname, String email, String phonenumber, ArrayList patients, ArrayList appointments){
         this.name = name;
