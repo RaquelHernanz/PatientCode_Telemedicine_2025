@@ -22,10 +22,10 @@ public class BitalinoDemo {
 
             //You need TO CHANGE THE MAC ADDRESS
             //You should have the MAC ADDRESS in a sticker in the Bitalino
-            String macAddress = "98:D3:91:FD:69:70";
+            String macAddress = "20:17:11:20:52:36";
             
             //Sampling rate, should be 10, 100 or 1000
-            int SamplingRate = 10;
+            int SamplingRate = 1000;
             bitalino.open(macAddress, SamplingRate);
 
             // Start acquisition on analog channels A2 and A6
@@ -33,8 +33,9 @@ public class BitalinoDemo {
             int[] channelsToAcquire = {1, 5};
             bitalino.start(channelsToAcquire);
 
-            //Read in total 10000000 times
-            for (int j = 0; j < 10000000; j++) {
+            //Read in total 100000 times
+            for (int j = 0; j < 10000; j++) {//If we set the limit to 100, it will read 100x10=1000 samples,
+                                             //so take into account the block size.
 
                 //Each time read a block of 10 samples 
                 int block_size=10;
