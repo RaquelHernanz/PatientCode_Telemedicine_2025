@@ -16,15 +16,6 @@ import utilities.Utilities;
 public class PatientMenu {
 
     private static Scanner scanner = new Scanner(System.in);
-    private static String loggedEmail = null; // quién ha iniciado sesión
-    private static java.util.Map<String,String> userPwdHash = new java.util.HashMap<>(); // email -> hash(password)
-    // Últimos síntomas guardados
-    private static String lastSymptomsDescription;
-    private static java.time.LocalDateTime lastSymptomsDateTime;
-    // Doctor seleccionado por el paciente (por ahora será un String, luego será Doctor)
-    //private static String selectedDoctor = null;
-    // Lista de mensajes enviados por el paciente (en memoria por ahora)
-    private static java.util.List<String> sentMessages = new java.util.ArrayList<>();
     private static Patient currentPatient = null; // Quien ha iniciado sesión
     private static Doctor selectedDoctor = null;
 
