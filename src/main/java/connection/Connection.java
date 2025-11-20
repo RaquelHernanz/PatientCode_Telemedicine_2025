@@ -58,20 +58,6 @@ public class Connection {
         }
     }
 
-    public static void releaseResources2() {
-        // Cerrar PrintWriter (no lanza IOException)
-        if (printWriter != null) {
-            printWriter.close();
-        }
-        // Cerrar BufferedReader y Socket
-        try {
-            if (bufferedReader != null) {
-                bufferedReader.close();
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 
     public static void sendMessage(String message) { //para enviar mensaje al servidor
         if (printWriter != null) { // comprobar que la conexión con el servidor está activa.

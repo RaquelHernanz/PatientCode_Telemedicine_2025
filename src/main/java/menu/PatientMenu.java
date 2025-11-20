@@ -95,7 +95,7 @@ public class PatientMenu {
 
         } catch (IOException e) {
             System.out.println("ERROR: Could not register with server. " + e.getMessage());
-            Connection.releaseResources2();
+            Connection.releaseResources();
         }
     }
     // EN menu/PatientMenu.java (Reemplazar el método login existente)
@@ -130,7 +130,7 @@ public class PatientMenu {
 
         } catch (IOException e) {
             System.out.println("ERROR: Login failed. " + e.getMessage());
-            Connection.releaseResources2();
+            Connection.releaseResources();
         }
     }
 
@@ -246,7 +246,7 @@ public class PatientMenu {
 
         } catch (IOException e) {
             System.out.println("ERROR communicating with server: Could not load doctor list. " + e.getMessage());
-            Connection.releaseResources2();
+            Connection.releaseResources();
             return null;
         }
     }
@@ -280,7 +280,7 @@ public class PatientMenu {
             System.out.println("Message sent successfully.");
         } catch (IOException e) {
             System.out.println("ERROR sending message: " + e.getMessage());
-            Connection.releaseResources2();
+            Connection.releaseResources();
         }
     }
 
@@ -315,7 +315,7 @@ public class PatientMenu {
             System.out.println("Appointment requested successfully. ID: " + appointmentId);
         } catch (IOException e) {
             System.out.println("ERROR requesting appointment: " + e.getMessage());
-            Connection.releaseResources2();
+            Connection.releaseResources();
         }
     }
 }
