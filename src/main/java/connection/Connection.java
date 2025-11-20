@@ -17,7 +17,7 @@ public class Connection {
     private static BufferedReader bufferedReader; // para leer
 
     // establecer la conexión al servidor
-    private static void connectToServer() throws IOException { //si el servidor no está encendido entonces se lanza IOException
+    public static void connectToServer() throws IOException { //si el servidor no está encendido entonces se lanza IOException
         if (socket == null || socket.isClosed()) { // si ya hay una conexión activa no se crea otro socket
             System.out.println("Connecting to server...");
             socket = new Socket("localhost", 9000); // para crear el socket, y conectarse al server.
@@ -75,6 +75,19 @@ public class Connection {
             return response;
         }
         return null;
+    }
+
+    public static String sendAndRead(String message) throws IOException {
+        // 1. Asegurar que estamos conectados
+        if (!isConnected()) {
+            connectToServer();
+        }
+
+        // 2. Enviar la petición al servidor
+        sendMessage(message);
+
+        // 3. Bloquear y esperar la respuesta
+        return readMessage();
     }
 
 }
