@@ -48,7 +48,8 @@ public class User {
 
     public enum Role {
         DOCTOR,
-        PATIENT
+        PATIENT,
+        ADMIN
     }
 
     @Override
@@ -62,5 +63,6 @@ public class User {
     public int hashCode() {
         return Objects.hash(username, password, role);
     }
+
 }
 

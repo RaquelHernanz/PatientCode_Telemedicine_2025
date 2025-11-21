@@ -301,4 +301,28 @@ public class PatientService {
                 : new JsonObject();
     }
 
+    public static List<String> listConversationWithDoctor(int doctorId) throws IOException {
+        if (currentPatient == null || currentPatient.getId() <= 0) {
+            throw new IllegalStateException("Patient not logged in.");
+        }
+
+        JsonObject payload = new JsonObject();
+        payload.addProperty("doctorId", doctorId);
+        payload.addProperty("patientId", currentPatient.getId());
+
+        JsonObject pl = call("LIST_MESSAGES", payload);
+
+        List<String> messages = new ArrayList<>();
+        if (pl.has("messages") && pl.get("messages").isJsonArray()) {
+            for (com.google.gson.JsonElement el : pl.getAsJsonArray("messages")) {
+                JsonObject m = el.getAsJsonObject();
+                String sender = m.has("senderRole") ? m.get("senderRole").getAsString() : "?";
+                String text   = m.has("text") ? m.get("text").getAsString() : "";
+                String ts     = m.has("timestamp") ? m.get("timestamp").getAsString() : "";
+                messages.add("[" + ts + "] " + sender + ": " + text);
+            }
+        }
+        return messages;
+    }
+
 }

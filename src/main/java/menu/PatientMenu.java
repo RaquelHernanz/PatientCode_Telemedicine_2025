@@ -72,7 +72,7 @@ public class PatientMenu {
         String surname = utilities.Utilities.readString("Surname: ");
         String phone = utilities.Utilities.readString("Phone Number: ");
         pojos.Sex sex = utilities.Utilities.readSex("Sex (M/F/O): ");
-        String dob = utilities.Utilities.obtainDate("Date of Birth");
+        String dob = utilities.Utilities.obtainDate("Date of Birth: ");
 
         // 2. Seleccionar Doctor (Requisito: seleccionar al registrar)
         Doctor doctor = selectDoctor();
@@ -166,9 +166,10 @@ public class PatientMenu {
                     return;
                 }
                 case "1" -> sendSymptoms(); // <-- CAMBIO DE NOMBRE: writeSymptoms -> sendSymptoms
-                case "2" -> sendMessage();
-                case "3" -> requestAppointment(); // <-- LLAMADA AL NUEVO MÉTODO
-                case "4" -> System.out.println("LÓGICA BITÁLINO PENDIENTE."); // recordECGorEDA();
+                case "2" -> viewMessagesWithDoctor();
+                case "3" -> sendMessage();
+                case "4" -> requestAppointment(); // <-- LLAMADA AL NUEVO MÉTODO
+                case "5" -> System.out.println("LÓGICA BITÁLINO PENDIENTE."); // recordECGorEDA();
                 default -> System.out.println("Invalid option. Try again.");
             }
         }
@@ -281,6 +282,33 @@ public class PatientMenu {
         } catch (IOException e) {
             System.out.println("ERROR sending message: " + e.getMessage());
             Connection.releaseResources();
+        }
+    }
+
+    private static void viewMessagesWithDoctor() {
+        try {
+            if (currentPatient == null || selectedDoctor == null) {
+                System.out.println("You must be logged in and have an assigned doctor.");
+                return;
+            }
+
+            // Llamamos a PatientService para pedir la conversación
+            java.util.List<String> msgs =
+                    PatientService.listConversationWithDoctor(selectedDoctor.getId());
+
+            if (msgs.isEmpty()) {
+                System.out.println("No messages in this conversation yet.");
+                return;
+            }
+
+            System.out.println("\n=== Conversation with Dr. " + selectedDoctor.getSurname() + " ===");
+            for (String line : msgs) {
+                System.out.println(line);
+            }
+            System.out.println("=== End of conversation ===");
+
+        } catch (IOException e) {
+            System.out.println("Error contacting server: " + e.getMessage());
         }
     }
 
