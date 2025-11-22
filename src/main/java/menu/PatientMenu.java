@@ -1,5 +1,8 @@
 package menu;
 
+import BITalino.BITalino;
+import BITalino.Frame;
+import BITalino.BITalinoException;
 import pojos.*;
 import connection.PatientService;
 import connection.Connection;
@@ -10,16 +13,28 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.IOException;
 import java.util.List;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import utilities.Utilities;
+
+import javax.bluetooth.RemoteDevice;
 
 public class PatientMenu {
 
     private static Scanner scanner = new Scanner(System.in);
     private static Patient currentPatient = null; // Quien ha iniciado sesión
     private static Doctor selectedDoctor = null;
+    private static Frame[] frame;//Para recoger los datos del Bitalino
 
     public static void main(String[] args) {
+        //Para probar el recordData
+        /*Double[][] data= recordBitalinoEDA();
+        for(int i=0;i< data[0].length;i++){
+            System.out.println("Sample: "+data[0][i]+" Value: "+data[1][i]);
+        }*/
+
         menu();
     }
 
@@ -150,7 +165,8 @@ public class PatientMenu {
 
             System.out.println("\n0. Log out");
             System.out.println("1. Send symptoms report");
-            System.out.println("2. Send message to assigned doctor");
+            System.out.println("2. View messages with assigned doctor");//He añadido esto porque faltaba
+            System.out.println("3. Send message to assigned doctor");
             System.out.println("3. Request appointment");
             System.out.println("4. Record ECG/EDA (Bitalino) [TO DO]");
 
@@ -169,7 +185,7 @@ public class PatientMenu {
                 case "2" -> viewMessagesWithDoctor();
                 case "3" -> sendMessage();
                 case "4" -> requestAppointment(); // <-- LLAMADA AL NUEVO MÉTODO
-                case "5" -> System.out.println("LÓGICA BITÁLINO PENDIENTE."); // recordECGorEDA();
+                case "5" -> recordECGorEDA();
                 default -> System.out.println("Invalid option. Try again.");
             }
         }
@@ -345,5 +361,167 @@ public class PatientMenu {
             System.out.println("ERROR requesting appointment: " + e.getMessage());
             Connection.releaseResources();
         }
+
+    }
+
+    private static void recordECGorEDA() {
+        System.out.println("Select 1 for ECG or 2 for EDA");
+        //Se le pide al paciente que elija
+        String input = scanner.nextLine().trim();
+        //Si el input no es 1 o 2 se le vuelve a pedir
+        while(input !="1" && input !="2"){
+            System.out.println("Invalid option. Select 1 for ECG or 2 for EDA");
+            input = scanner.nextLine().trim();
+        }
+        switch (input) {
+            case "1": {
+                System.out.println("Recording ECG");
+                Double[][] ecgData= recordBitalinoECG();
+                //Quedaría enviarlos datos
+                break;
+            }
+            case "2":{
+                System.out.println("Recording EDA");
+                Double[][] edaData= recordBitalinoEDA();
+                //Quedaría enviarlos datos
+                break;
+            }
+            default:{
+                System.out.println("Invalid option");
+                break;
+            }
+        }
+    }
+
+    //Devuelve un array de Double con los datos recogidos del Bitalino ECG
+    private static Double[][] recordBitalinoECG(){
+
+        Double[][] data = new Double[2][10000]; //Array para almacenar los datos recogidos
+                                                //La posición [0] es para el número de sample y la [1] para el valor recogido
+        BITalino bitalino = null;
+        try {
+            bitalino = new BITalino();
+
+            // Código para buscar dispositivos Bitalino cercanos
+            Vector<RemoteDevice> devices = bitalino.findDevices();
+            System.out.println(devices);
+
+            //Mac Address del Bitalino
+            String macAddress = "20:17:11:20:52:36";
+
+            int SamplingRate = 1000;
+            bitalino.open(macAddress, SamplingRate);
+
+            // Empieza la adquisición en el canal analógico A2
+            int[] channelsToAcquire = {1}; //A2 es el canal 1
+            bitalino.start(channelsToAcquire);
+
+            //Lee 10000 samples en total
+            for (int j = 0; j < 1000; j++) {//Si ponemos el límite a 100, será 100x10=1000 muestras, ya que los bloques
+                                            //son de 10 muestras.
+
+                //Cada vez lee un bloque de 10 samples
+                int block_size=10;
+                frame = bitalino.read(block_size);
+
+                //Imprime los samples
+                /*for (int i = 0; i < frame.length; i++) {
+                    System.out.println((j * block_size + i) + " seq: " + frame[i].seq + " "
+                                    + frame[i].analog[0] + " "
+                    );
+
+                }*/
+                //Almacena los datos en el array
+                for (int i = 0; i < frame.length; i++) {
+                    data[0][j * block_size + i] = (double) j * block_size + i;  //Número de sample. Es el número del ciclo multiplicado por el
+                                                                                //tamaño del bloque más el índice dentro del bloque
+                    data[1][j * block_size + i] = (double) frame[i].analog[0]; //Valor recogido
+
+                }
+            }
+            //Para de adquirir datos
+            bitalino.stop();
+        } catch (BITalinoException ex) {
+            Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Throwable ex) {
+            Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                //Cierra la conexión bluetooth
+                if (bitalino != null) {
+                    bitalino.close();
+                }
+            } catch (BITalinoException ex) {
+                Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return data;
+    }
+
+    //Devuelve un array de Double con los datos recogidos del Bitalino EDA
+    private static Double[][] recordBitalinoEDA(){
+
+        Double[][] data = new Double[2][10000]; //Array para almacenar los datos recogidos
+        //La posición [0] es para el número de sample y la [1] para el valor recogido
+        BITalino bitalino = null;
+        try {
+            bitalino = new BITalino();
+
+            // Código para buscar dispositivos Bitalino cercanos
+            Vector<RemoteDevice> devices = bitalino.findDevices();
+            System.out.println(devices);
+
+            //Mac Address del Bitalino
+            String macAddress = "20:17:11:20:52:36";
+
+            int SamplingRate = 1000;
+            bitalino.open(macAddress, SamplingRate);
+
+            // Empieza la adquisición en el canal analógico A3
+            int[] channelsToAcquire = {1}; //A3 es el canal 2 de EDA
+            bitalino.start(channelsToAcquire);
+
+            //Lee 10000 samples en total
+            for (int j = 0; j < 1000; j++) {//Si ponemos el límite a 100, será 100x10=1000 muestras, ya que los bloques
+                //son de 10 muestras.
+
+                //Cada vez lee un bloque de 10 samples
+                int block_size=10;
+                frame = bitalino.read(block_size);
+
+                //Imprime los samples
+                /*for (int i = 0; i < frame.length; i++) {
+                    System.out.println((j * block_size + i) + " seq: " + frame[i].seq + " "
+                            + frame[i].analog[0] + " "
+                    );
+
+                }*/
+                //Almacena los datos en el array
+                for (int i = 0; i < frame.length; i++) {
+                    data[0][j * block_size + i] = (double) j * block_size + i;  //Número de sample. Es el número del ciclo multiplicado por el
+                    //tamaño del bloque más el índice dentro del bloque
+                    data[1][j * block_size + i] = (double) frame[i].analog[0]; //Valor recogido
+
+                }
+            }
+            //Para de adquirir datos
+            bitalino.stop();
+        } catch (BITalinoException ex) {
+            Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Throwable ex) {
+            Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                //Cierra la conexión bluetooth
+                if (bitalino != null) {
+                    bitalino.close();
+                }
+            } catch (BITalinoException ex) {
+                Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return data;
     }
 }
