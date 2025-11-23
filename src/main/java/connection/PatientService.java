@@ -325,4 +325,26 @@ public class PatientService {
         return messages;
     }
 
+    public static boolean sendMeasurements(int doctorId, List<Integer> data, String type) throws IOException {
+        if (currentPatient == null) {
+            throw new IllegalStateException("Patient not logged in.");
+        }
+        LocalDateTime date = LocalDateTime.now();
+
+        JsonObject payload = new JsonObject();
+
+        JsonArray values = new JsonArray();
+        for (Integer v : data) {
+            values.add(v);
+        }
+        payload.addProperty("doctorId", doctorId);
+        payload.addProperty("patientId", currentPatient.getId());
+        payload.addProperty("type", type);
+        payload.addProperty("date", Utilities.formatDateTime(date)); // ISO 8601
+        payload.add("values", values);
+
+
+        call("SEND_MEASUREMENT", payload);
+        return true; // Si no hay excepción, fue exitoso.
+    }
 }

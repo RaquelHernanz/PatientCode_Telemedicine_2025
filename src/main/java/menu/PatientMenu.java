@@ -7,6 +7,7 @@ import pojos.*;
 import connection.PatientService;
 import connection.Connection;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -30,9 +31,9 @@ public class PatientMenu {
 
     public static void main(String[] args) {
         //Para probar el recordData
-        /*Double[][] data= recordBitalinoEDA();
+        /*Double[] data= recordBitalinoEDA();
         for(int i=0;i< data[0].length;i++){
-            System.out.println("Sample: "+data[0][i]+" Value: "+data[1][i]);
+            System.out.println("Sample: "+i+" Value: "+data[i]);
         }*/
 
         menu();
@@ -376,14 +377,28 @@ public class PatientMenu {
         switch (input) {
             case "1": {
                 System.out.println("Recording ECG");
-                Double[][] ecgData= recordBitalinoECG();
-                //Quedaría enviarlos datos
+                List<Integer> ecgData= recordBitalinoECG(); //Recoge los datos del ECG
+                Measurement measurement=new Measurement(Measurement.Type.ECG, ecgData, LocalDateTime.now(), currentPatient);
+                try {
+                    PatientService.sendMeasurements(selectedDoctor.getId(), measurement.getValues(), "ECG");//Los envía al servidor
+                    System.out.println("ECG sent successfully.");
+                } catch (IOException e) {
+                    System.out.println("ERROR sending ECG: " + e.getMessage());
+                    Connection.releaseResources();
+                }
                 break;
             }
             case "2":{
                 System.out.println("Recording EDA");
-                Double[][] edaData= recordBitalinoEDA();
-                //Quedaría enviarlos datos
+                List<Integer> edaData= recordBitalinoEDA();//Recoge los datos del EDA
+                Measurement measurement=new Measurement(Measurement.Type.EDA, edaData, LocalDateTime.now(), currentPatient);
+                try {
+                    PatientService.sendMeasurements(selectedDoctor.getId(), edaData, "EDA");//Los envía al servidor
+                    System.out.println("EDA sent successfully.");
+                } catch (IOException e) {
+                    System.out.println("ERROR sending EDA: " + e.getMessage());
+                    Connection.releaseResources();
+                }
                 break;
             }
             default:{
@@ -394,9 +409,9 @@ public class PatientMenu {
     }
 
     //Devuelve un array de Double con los datos recogidos del Bitalino ECG
-    private static Double[][] recordBitalinoECG(){
+    private static List<Integer> recordBitalinoECG(){
 
-        Double[][] data = new Double[2][10000]; //Array para almacenar los datos recogidos
+        List<Integer> data = new ArrayList<>(); //ArrayList para almacenar los datos recogidos
                                                 //La posición [0] es para el número de sample y la [1] para el valor recogido
         BITalino bitalino = null;
         try {
@@ -416,7 +431,7 @@ public class PatientMenu {
             int[] channelsToAcquire = {1}; //A2 es el canal 1
             bitalino.start(channelsToAcquire);
 
-            //Lee 10000 samples en total
+            //Lee 10000 samples en total, 10 segundos a 1000 Hz
             for (int j = 0; j < 1000; j++) {//Si ponemos el límite a 100, será 100x10=1000 muestras, ya que los bloques
                                             //son de 10 muestras.
 
@@ -433,9 +448,7 @@ public class PatientMenu {
                 }*/
                 //Almacena los datos en el array
                 for (int i = 0; i < frame.length; i++) {
-                    data[0][j * block_size + i] = (double) j * block_size + i;  //Número de sample. Es el número del ciclo multiplicado por el
-                                                                                //tamaño del bloque más el índice dentro del bloque
-                    data[1][j * block_size + i] = (double) frame[i].analog[0]; //Valor recogido
+                    data.add(frame[i].analog[0]); //Valor recogido
 
                 }
             }
@@ -460,9 +473,9 @@ public class PatientMenu {
     }
 
     //Devuelve un array de Double con los datos recogidos del Bitalino EDA
-    private static Double[][] recordBitalinoEDA(){
+    private static List<Integer> recordBitalinoEDA(){
 
-        Double[][] data = new Double[2][10000]; //Array para almacenar los datos recogidos
+        List<Integer> data = new ArrayList<>(); //ArrayList para almacenar los datos recogidos
         //La posición [0] es para el número de sample y la [1] para el valor recogido
         BITalino bitalino = null;
         try {
@@ -482,7 +495,7 @@ public class PatientMenu {
             int[] channelsToAcquire = {1}; //A3 es el canal 2 de EDA
             bitalino.start(channelsToAcquire);
 
-            //Lee 10000 samples en total
+            //Lee 10000 samples en total, 10 segundos a 1000 Hz
             for (int j = 0; j < 1000; j++) {//Si ponemos el límite a 100, será 100x10=1000 muestras, ya que los bloques
                 //son de 10 muestras.
 
@@ -499,9 +512,7 @@ public class PatientMenu {
                 }*/
                 //Almacena los datos en el array
                 for (int i = 0; i < frame.length; i++) {
-                    data[0][j * block_size + i] = (double) j * block_size + i;  //Número de sample. Es el número del ciclo multiplicado por el
-                    //tamaño del bloque más el índice dentro del bloque
-                    data[1][j * block_size + i] = (double) frame[i].analog[0]; //Valor recogido
+                    data.add(frame[i].analog[0]); //Valor recogido
 
                 }
             }

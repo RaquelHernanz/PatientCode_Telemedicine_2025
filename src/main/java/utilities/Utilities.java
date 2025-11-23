@@ -10,6 +10,17 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
+/*
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
+import javax.swing.JFrame;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;*/
 
 public class Utilities {
 
@@ -163,4 +174,32 @@ public class Utilities {
         try { return LocalDateTime.parse(s, ISO_DT); }
         catch (DateTimeParseException e) { return null; }
     }
+
+    /*
+    //Para representar gráficas a partir de un Double[]
+    public static void showChartFromArray(Double[] data, String title) {
+        XYSeries series = new XYSeries("Data");
+        for(int i = 0; i < data.length; i++) {
+            series.add(i, data[i]);
+        }
+
+        XYSeriesCollection dataset = new XYSeriesCollection(series);
+
+        JFreeChart chart = ChartFactory.createXYLineChart(
+                title,
+                "Tiempo (s)",
+                "Valor",
+                dataset
+        );
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+
+        JFrame frame = new JFrame("Gráfica "+title);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setContentPane(chartPanel);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }*/
+
 }
