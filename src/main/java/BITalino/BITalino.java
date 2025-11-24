@@ -109,7 +109,7 @@ package BITalino;
               * \exception IOException
               * \exception SecurityException
               */
-             if (macAdd.split(":").length > 1)
+             if (macAdd.split(":").length > 1) //Validar la dirección MAC del dispositivo BITalino que le pasas.
              {
                  macAdd = macAdd.replace(":", "");
              }
@@ -120,7 +120,9 @@ package BITalino;
 
          try
          {
+             //Abrir una conexión Bluetooth con ese dispositivo.
              hSocket = (StreamConnection)Connector.open("btspp://" + macAdd + ":1", Connector.READ_WRITE);
+             // entrada y salida para comunicarse por el socket
              iStream = hSocket.openDataInputStream();
              oStream = hSocket.openDataOutputStream();
              Thread.sleep(2000);
@@ -134,10 +136,11 @@ package BITalino;
          try
          {
              int variableToSend = 0;
-         // Configure sampling rate
+         // Configurar la frecuencia de muestreo (samplingRate) que va a usar el BITalino
 
              switch(samplingRate)
              {
+                 //según el valor de la frecuencia de muestreo establece un código interno
              case 1000:
                  variableToSend = 0x3;
                  break;
@@ -151,10 +154,11 @@ package BITalino;
                  variableToSend = 0x0;
                  break;
              default:
-                 close();
+                 close(); //si la frecuencia no es ninguna de las anteriores
              }
-             variableToSend = (variableToSend<<6)|0x03;
-             Write(variableToSend);
+             variableToSend = (variableToSend<<6)|0x03; // comando binario que el BITalino espera para ajustar la frecuencia.
+             Write(variableToSend); // convierte el entero a bytes
+
          }
          catch (Exception e)
          {
@@ -164,6 +168,7 @@ package BITalino;
 
      public void start(int[] anChannels) throws Throwable
      {
+         //empezar a coger señales del bitalino
                  /** Starts a signal acquisition from the device.
                   * \param[in] anChannels Set of channels to acquire. Accepted channels are 0...5 for inputs A1...A6.
                   * If this set is empty, no analog channels will be acquired.
@@ -171,32 +176,34 @@ package BITalino;
                   * \exception BITalinoException (BITalinoErrorTypes.ANALOG_CHANNELS_NOT_VALID)
                   * \exception BITalinoException (BITalinoErrorTypes.BT_DEVICE_NOT_CONNECTED)
                   */
-         analogChannels = anChannels;
-         if (analogChannels.length > 6 | analogChannels.length == 0) {
+         analogChannels = anChannels; // guarda los canales en variable
+         if (analogChannels.length > 6 | analogChannels.length == 0) { // valida los canales
              throw new BITalinoException(BITalinoErrorTypes.ANALOG_CHANNELS_NOT_VALID);
          } else {
              int bit = 1;
-             for (int i : anChannels) {
+             for (int i : anChannels) { // valida cada canal individualmente
+                 // BITalino tiene 6 entradas analógicas donde puede leer señales biomédicas, solo puede haber 6 canales
                  if (i<0 | i>5)
                  {
                      throw new BITalinoException(BITalinoErrorTypes.ANALOG_CHANNELS_NOT_VALID);
                  }
                  else
                  {
-                     bit = bit | 1<<(2+i);
+                     bit = bit | 1<<(2+i); // si es válido activa el bit correspondiente
+                     //Este número se envía al BITalino para iniciar adquisición con estos canales.
                  }
              }
              int nChannels = analogChannels.length;
-             if (nChannels <= 4) {
+             if (nChannels <= 4) { // define cuántos bytes enviará por cada muestra.
+                 // calcula cuántos bytes tiene cada paquete de datos que el BITalino va a enviar cuando empieza a medir.
                  number_bytes = (int) Math.ceil(((float)12 + (float)10 *nChannels)/8);
-
 
              } else {
                  number_bytes = (int) Math.ceil(((float)52 + (float)6*(nChannels-4))/8);
              }
              try
              {
-                 Write(bit);
+                 Write(bit); // Envía el comando de inicio al BITalino indicando qué canales usar.
              }
              catch(Exception e)
              {
@@ -207,6 +214,7 @@ package BITalino;
      }
 
      public void stop() throws BITalinoException
+     // detener la adquisición de señales del BITalino.
      {
                  /** Stops a signal acquisition.
                   * \remarks This method must be called only during an acquisition.
@@ -214,7 +222,7 @@ package BITalino;
                   */
          try
          {
-             Write(0);
+             Write(0); // detener la adquisición, el comando que el BITalino entiende es 0.
          }
          catch(Exception e)
          {
@@ -229,6 +237,7 @@ package BITalino;
                   */
          try
          {
+             // desconectarse del bitalino y cerrar recursos
              hSocket.close();
              iStream.close();
              oStream.close();
@@ -252,8 +261,8 @@ package BITalino;
           */
          try
          {
-             oStream.write(data);
-             oStream.flush();
+             oStream.write(data); // enviar byte al bitalino, el del sampling rate o el de stop por ejemplo
+             oStream.flush(); // mandarlo inmediatamente, sin esperar
              Thread.sleep(1000);
          }
          catch (Exception e)
@@ -262,8 +271,13 @@ package BITalino;
          }
      }
 
-     public void battery(int value) throws BITalinoException
+     public void battery(int value) throws BITalinoException //no lo estamos usando
      {
+         //BITalino permite ajustar el voltaje al que se enciende su LED de batería baja.
+         // PARA QUE NO SE QUEDE EL BITALINO SIN BATERÍA!!
+         //Ese umbral se codifica como un valor entre 0 y 63.
+         // da el aviso de a qué nivel de batería el LED de aviso debe encenderse.
+
                 /** Sets the battery voltage threshold for the low-battery LED.
                  * \param[in] value Battery voltage threshold. Default value is 0.
                  * Value | Voltage Threshold
@@ -289,8 +303,9 @@ package BITalino;
 
      }
 
-     public void trigger(int[] digitalArray) throws BITalinoException
+     public void trigger(int[] digitalArray) throws BITalinoException // no lo estamos usando
      {
+         //activar o desactivar las salidas digitales del BITalino.
                 /** Assigns the digital outputs states.
                  * \param[in] digitalArray Vector of integers to assign to digital outputs, starting at first output (O1).
                  * On each vector element, 0 sets the output to low level and 1 sets the output to high level.

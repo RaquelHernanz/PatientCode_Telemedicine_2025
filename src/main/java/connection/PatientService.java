@@ -18,6 +18,7 @@ import java.util.ArrayList; // Para construir listas
  * Gestiona la comunicación con el servidor para el cliente Paciente[cite: 33].
  */
 public class PatientService {
+    // clase intermedia entre el menú del paciente y el servidor.
     private static final Gson gson = new Gson();
 
     private static Patient currentPatient;
@@ -25,11 +26,11 @@ public class PatientService {
     // --- GETTERS & SETTERS ---
     public static Patient getCurrentPatient(){
         return currentPatient;
-    }
+    } // devuelve el paciente que está usando la app
 
     public static void setCurrentPatient(Patient p){
         currentPatient = p;
-    }
+    } //asigna el paciente tras el log in
 
     // Asegura que el socket está abierto antes de cualquier comunicación
     private static void ensureConnected() throws IOException{
@@ -45,11 +46,13 @@ public class PatientService {
      * @return El objeto Patient con el ID asignado por el servidor, o null si falla.
      */
     public static Patient registerPatient(Patient patient, String password) throws IOException {
-        ensureConnected();
-        String requestId = "pat-reg-" + System.currentTimeMillis();
+        ensureConnected(); // se asegura que este conectado
+        String requestId = "pat-reg-" + System.currentTimeMillis(); // genera un request unico
 
         // 1. Construir Payload (ajustado al Protocolo del Servidor)
-        JsonObject payload = new JsonObject();
+        // payload es “el contenido real” que se envía dentro de una petición.
+
+        JsonObject payload = new JsonObject(); // construye el payload, la petición entera
         payload.addProperty("name", patient.getName());
         payload.addProperty("surname", patient.getSurname());
         payload.addProperty("email", patient.getEmail());
@@ -68,15 +71,15 @@ public class PatientService {
         request.add("payload", payload);
 
         // 3. Enviar y Leer Respuesta
-        String jsonRequest = gson.toJson(request);
-        String jsonResponse = Connection.sendAndRead(jsonRequest);
+        String jsonRequest = gson.toJson(request); // convierte el JsonObject a un String JSON
+        String jsonResponse = Connection.sendAndRead(jsonRequest); // envía el JSON al servidor y espera la respuesta
 
         if (jsonResponse == null) {
             throw new IOException("No response from server.");
         }
 
         // 4. Procesar Respuesta
-        JsonObject resp = gson.fromJson(jsonResponse, JsonObject.class);
+        JsonObject resp = gson.fromJson(jsonResponse, JsonObject.class); // convierte la respuesta en objeto
         String status = resp.has("status") ? resp.get("status").getAsString() : "ERROR";
 
         if ("OK".equalsIgnoreCase(status) || "ALL_RIGHT".equalsIgnoreCase(status)) {
@@ -85,6 +88,14 @@ public class PatientService {
                 // Registro exitoso: asignamos el ID devuelto
                 patient.setId(respPayload.get("patientId").getAsInt());
                 currentPatient = patient;
+                return patient;
+            }
+        }if ("OK".equalsIgnoreCase(status) || "ALL_RIGHT".equalsIgnoreCase(status)) { // respuesta del servidor sobre si fue correcta la operación
+            JsonObject respPayload = resp.getAsJsonObject("payload"); // solo coge el payload que son los valores reales
+            if (respPayload != null && respPayload.has("patientId")) {
+                // Registro exitoso: asignamos el ID devuelto
+                patient.setId(respPayload.get("patientId").getAsInt()); // coge el id que le manda el servidor del paciente que se ha registrado
+                currentPatient = patient; // asigna al paciente como current patient
                 return patient;
             }
         }
