@@ -10,7 +10,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
-/*
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -20,7 +20,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import javax.swing.JFrame;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;*/
+import java.io.IOException;
 
 public class Utilities {
 
@@ -175,7 +175,7 @@ public class Utilities {
         catch (DateTimeParseException e) { return null; }
     }
 
-    /*
+
     //Para representar gráficas a partir de un Double[]
     public static void showChartFromArray(Double[] data, String title) {
         XYSeries series = new XYSeries("Data");
@@ -200,6 +200,6 @@ public class Utilities {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-    }*/
+    }
 
 }
