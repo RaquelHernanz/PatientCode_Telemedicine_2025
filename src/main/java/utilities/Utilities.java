@@ -176,6 +176,8 @@ public class Utilities {
     }
 
 
+
+    //TODO Esto se puede borrar
     //Para representar gráficas a partir de un Double[]
     public static void showChartFromArray(Double[] data, String title) {
         XYSeries series = new XYSeries("Data");

@@ -48,6 +48,7 @@
         </dependency>
 
         <!-- JFreeChart para las gráficas -->
+        <!--TODO ESTO SE PUEDE BORRAR-->
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
@@ -55,7 +56,7 @@
         </dependency>
     </dependencies>
 
-
+    <!--TODO ESTO SE PUEDE BORRAR-->
     <build>
         <plugins>
             <plugin>
