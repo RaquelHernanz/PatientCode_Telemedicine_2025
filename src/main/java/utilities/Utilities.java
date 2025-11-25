@@ -32,6 +32,7 @@ public class Utilities {
         return scanner.nextLine();
     }
 
+
     public static int readInt(String prompt) {
         while (true) {
             System.out.print(prompt);

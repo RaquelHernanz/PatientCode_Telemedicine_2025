@@ -6,10 +6,7 @@ import BITalino.BITalinoException;
 import pojos.*;
 import connection.PatientService;
 import connection.Connection;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.IOException;
@@ -25,7 +22,7 @@ import javax.bluetooth.RemoteDevice;
 public class PatientMenu {
 
     private static Scanner scanner = new Scanner(System.in);
-    private static Patient currentPatient = null; // Quien ha iniciado sesión
+    //private static Patient currentPatient = null; // Quien ha iniciado sesión
     private static Doctor selectedDoctor = null;
     private static Frame[] frame;//Para recoger los datos del Bitalino
 
@@ -104,7 +101,7 @@ public class PatientMenu {
         // 4. Enviar el registro al servidor (USANDO PatientService)
         try {
             Patient p = PatientService.registerPatient(newPatient, password);
-            currentPatient = p; // Marcar como logueado
+            PatientService.setCurrentPatient(p);  // Marcar como logueado
             selectedDoctor = doctor; // Asignar el doctor seleccionado
             System.out.println("Registration successful. ID: " + p.getId());
             patientMenu(); // Ir al menú interno
@@ -127,19 +124,28 @@ public class PatientMenu {
         // Lógica para establecer una conexión inicial
         try {
             Patient p = PatientService.login(email, password);
-            currentPatient = p; // Marcar como logueado
+            if (p == null) {
+                System.out.println("Invalid email or password.");
+                return;
+            }
+            PatientService.setCurrentPatient(p); // Marcar como logueado
 
             // Asumiendo que el PatientService no devuelve el Doctor asignado:
             // El paciente necesita seleccionar un doctor después del login si no tiene uno asignado.
-            if (currentPatient != null && currentPatient.getDoctor() == null) {
+            if (p.getDoctor() == null) {
                 System.out.println("\nYou must select a supervising doctor now.");
                 selectedDoctor = selectDoctor();
+                if (selectedDoctor == null) {
+                    System.out.println("Login aborted. No doctor selected.");
+                    PatientService.setCurrentPatient(null);
+                    return;
+                }
             } else {
+                selectedDoctor = p.getDoctor();
+            }
                 // Si el login fue exitoso, el paciente ya debería tener un doctor asociado.
                 // Aquí deberías cargar la información completa del doctor del paciente desde el servidor,
                 // pero por simplicidad, asumiremos que si p!=null, el login funciona.
-                selectedDoctor = currentPatient.getDoctor();
-            }
 
             System.out.println("Login successful.");
             patientMenu();
@@ -152,24 +158,24 @@ public class PatientMenu {
 
     private static void patientMenu() {
         while (true) {
-            if (currentPatient == null) return;
+            Patient logged = PatientService.getCurrentPatient();
+            if (logged == null) return;
+            // Mostrar ID y Email
+            System.out.println("Logged as: " + logged.getEmail() + " (ID: " + logged.getId() + ")");
 
             System.out.println();
             System.out.println("=== Patient Menu ===");
-            // Mostrar ID y Email
-            System.out.println("Logged as: " + currentPatient.getEmail() + " (ID: " + currentPatient.getId() + ")");
 
             // Mostrar doctor asignado
             if (selectedDoctor != null) {
                 System.out.println("Assigned Doctor: Dr. " + selectedDoctor.getSurname());
             }
-
             System.out.println("\n0. Log out");
             System.out.println("1. Send symptoms report");
-            System.out.println("2. View messages with assigned doctor");//He añadido esto porque faltaba
+            System.out.println("2. View messages with assigned doctor");
             System.out.println("3. Send message to assigned doctor");
-            System.out.println("3. Request appointment");
-            System.out.println("4. Record ECG/EDA (Bitalino) [TO DO]");
+            System.out.println("4. Request appointment");
+            System.out.println("5. Record ECG/EDA (Bitalino)");
 
             System.out.print("Choose an option: ");
 
@@ -177,7 +183,7 @@ public class PatientMenu {
             switch (input) {
                 case "0" -> {
                     System.out.println("Logging out.");
-                    currentPatient = null;
+                    PatientService.setCurrentPatient(null);
                     selectedDoctor = null;
                     Connection.releaseResources();
                     return;
@@ -193,7 +199,7 @@ public class PatientMenu {
     }
 
     private static void sendSymptoms() {
-        if (currentPatient == null) {
+        if (PatientService.getCurrentPatient() == null) {
             System.out.println("You must log in first.");
             return;
         }
@@ -270,7 +276,7 @@ public class PatientMenu {
     }
 
     private static void sendMessage() {
-        if (currentPatient == null) {
+        if (PatientService.getCurrentPatient() == null) {
             System.out.println("You must log in first.");
             return;
         }
@@ -304,7 +310,7 @@ public class PatientMenu {
 
     private static void viewMessagesWithDoctor() {
         try {
-            if (currentPatient == null || selectedDoctor == null) {
+            if (PatientService.getCurrentPatient() == null || selectedDoctor == null) {
                 System.out.println("You must be logged in and have an assigned doctor.");
                 return;
             }
@@ -333,7 +339,7 @@ public class PatientMenu {
      * Permite al paciente solicitar una cita con su doctor asignado.
      */
     private static void requestAppointment() {
-        if (currentPatient == null) {
+        if (PatientService.getCurrentPatient() == null) {
             System.out.println("You must log in first.");
             return;
         }
@@ -366,11 +372,19 @@ public class PatientMenu {
     }
 
     private static void recordECGorEDA() {
+        if (PatientService.getCurrentPatient() == null) {
+            System.out.println("You must log in first.");
+            return;
+        }
+        if (selectedDoctor == null) {
+            System.out.println("You must have an assigned doctor.");
+            return;
+        }
         System.out.println("Select 1 for ECG or 2 for EDA");
         //Se le pide al paciente que elija
         String input = scanner.nextLine().trim();
         //Si el input no es 1 o 2 se le vuelve a pedir
-        while(input !="1" && input !="2"){
+        while(!input.equals("1") && !input.equals("2")){
             System.out.println("Invalid option. Select 1 for ECG or 2 for EDA");
             input = scanner.nextLine().trim();
         }
@@ -378,7 +392,11 @@ public class PatientMenu {
             case "1": {
                 System.out.println("Recording ECG");
                 List<Integer> ecgData= recordBitalinoECG(); //Recoge los datos del ECG
-                Measurement measurement=new Measurement(Measurement.Type.ECG, ecgData, LocalDateTime.now(), currentPatient);
+                if (ecgData == null || ecgData.isEmpty()) {
+                    System.out.println("No ECG data recorded. Measurement will not be sent.");
+                    return;
+                }
+                Measurement measurement=new Measurement(Measurement.Type.ECG, ecgData, LocalDateTime.now(), PatientService.getCurrentPatient());
                 try {
                     PatientService.sendMeasurements(selectedDoctor.getId(), measurement.getValues(), "ECG");//Los envía al servidor
                     System.out.println("ECG sent successfully.");
@@ -391,9 +409,13 @@ public class PatientMenu {
             case "2":{
                 System.out.println("Recording EDA");
                 List<Integer> edaData= recordBitalinoEDA();//Recoge los datos del EDA
-                Measurement measurement=new Measurement(Measurement.Type.EDA, edaData, LocalDateTime.now(), currentPatient);
+                if (edaData == null || edaData.isEmpty()) {
+                    System.out.println("No EDA data recorded. Measurement will not be sent.");
+                    return;
+                }
+                Measurement measurement=new Measurement(Measurement.Type.EDA, edaData, LocalDateTime.now(), PatientService.getCurrentPatient());
                 try {
-                    PatientService.sendMeasurements(selectedDoctor.getId(), edaData, "EDA");//Los envía al servidor
+                    PatientService.sendMeasurements(selectedDoctor.getId(), measurement.getValues(), "EDA");//Los envía al servidor
                     System.out.println("EDA sent successfully.");
                 } catch (IOException e) {
                     System.out.println("ERROR sending EDA: " + e.getMessage());
@@ -422,7 +444,8 @@ public class PatientMenu {
             System.out.println(devices);
 
             //Mac Address del Bitalino
-            String macAddress = "20:17:11:20:52:36";
+            //Pablo: "20:17:11:20:52:36"
+            String macAddress = Utilities.readString("Enter MAC address for Bitalino: ");
 
             int SamplingRate = 1000;
             bitalino.open(macAddress, SamplingRate);
@@ -455,8 +478,12 @@ public class PatientMenu {
             //Para de adquirir datos
             bitalino.stop();
         } catch (BITalinoException ex) {
+            System.out.println("BITalino error (ECG): " + ex.getMessage());
+            data.clear();
             Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Throwable ex) {
+            System.out.println("Unexpected error while recording ECG: " + ex.getMessage());
+            data.clear();
             Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
@@ -486,7 +513,8 @@ public class PatientMenu {
             System.out.println(devices);
 
             //Mac Address del Bitalino
-            String macAddress = "20:17:11:20:52:36";
+            //Pablo: "20:17:11:20:52:36"
+            String macAddress = Utilities.readString("Enter MAC address for Bitalino: ");
 
             int SamplingRate = 1000;
             bitalino.open(macAddress, SamplingRate);
@@ -519,8 +547,12 @@ public class PatientMenu {
             //Para de adquirir datos
             bitalino.stop();
         } catch (BITalinoException ex) {
+            System.out.println("BITalino error (EDA): " + ex.getMessage());
+            data.clear();
             Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Throwable ex) {
+            System.out.println("Unexpected error while recording EDA: " + ex.getMessage());
+            data.clear();
             Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {

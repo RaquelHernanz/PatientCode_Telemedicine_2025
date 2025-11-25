@@ -70,6 +70,15 @@ public class PatientService {
         request.addProperty("requestId", requestId);
         request.add("payload", payload);
 
+        // >>>Incluir el doctor <<<
+        Doctor doc = patient.getDoctor();
+        if (doc == null) {
+            throw new IOException("No doctor assigned to patient before registration.");
+        }
+        payload.addProperty("doctorId", doc.getId());
+        payload.addProperty("doctorEmail", doc.getEmail());
+        payload.addProperty("doctorName", doc.getName()); // solo nombre, como fallback
+
         // 3. Enviar y Leer Respuesta
         String jsonRequest = gson.toJson(request); // convierte el JsonObject a un String JSON
         String jsonResponse = Connection.sendAndRead(jsonRequest); // envía el JSON al servidor y espera la respuesta
@@ -82,15 +91,7 @@ public class PatientService {
         JsonObject resp = gson.fromJson(jsonResponse, JsonObject.class); // convierte la respuesta en objeto
         String status = resp.has("status") ? resp.get("status").getAsString() : "ERROR";
 
-        if ("OK".equalsIgnoreCase(status) || "ALL_RIGHT".equalsIgnoreCase(status)) {
-            JsonObject respPayload = resp.getAsJsonObject("payload");
-            if (respPayload != null && respPayload.has("patientId")) {
-                // Registro exitoso: asignamos el ID devuelto
-                patient.setId(respPayload.get("patientId").getAsInt());
-                currentPatient = patient;
-                return patient;
-            }
-        }if ("OK".equalsIgnoreCase(status) || "ALL_RIGHT".equalsIgnoreCase(status)) { // respuesta del servidor sobre si fue correcta la operación
+        if ("OK".equalsIgnoreCase(status) || "ALL_RIGHT".equalsIgnoreCase(status)) { // respuesta del servidor sobre si fue correcta la operación
             JsonObject respPayload = resp.getAsJsonObject("payload"); // solo coge el payload que son los valores reales
             if (respPayload != null && respPayload.has("patientId")) {
                 // Registro exitoso: asignamos el ID devuelto
@@ -351,7 +352,7 @@ public class PatientService {
         payload.addProperty("doctorId", doctorId);
         payload.addProperty("patientId", currentPatient.getId());
         payload.addProperty("type", type);
-        payload.addProperty("date", Utilities.formatDateTime(date)); // ISO 8601
+        payload.addProperty("date", date.toString()); // ISO 8601
         payload.add("values", values);
 
 
