@@ -132,7 +132,7 @@ public class PatientMenu {
 
             // Asumiendo que el PatientService no devuelve el Doctor asignado:
             // El paciente necesita seleccionar un doctor después del login si no tiene uno asignado.
-            if (p.getDoctor() == null) {
+            /*if (p.getDoctor() == null) {
                 System.out.println("\nYou must select a supervising doctor now.");
                 selectedDoctor = selectDoctor();
                 if (selectedDoctor == null) {
@@ -142,7 +142,9 @@ public class PatientMenu {
                 }
             } else {
                 selectedDoctor = p.getDoctor();
-            }
+            }*/
+            selectedDoctor = p.getDoctor();
+            System.out.println(p.getDoctor().getName() + " logged in successfully.");
                 // Si el login fue exitoso, el paciente ya debería tener un doctor asociado.
                 // Aquí deberías cargar la información completa del doctor del paciente desde el servidor,
                 // pero por simplicidad, asumiremos que si p!=null, el login funciona.
