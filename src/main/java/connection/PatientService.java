@@ -3,6 +3,7 @@ package connection;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray; // Necesario para enviar List<Integer> de mediciones
+import pojos.Appointment;
 import pojos.Doctor;
 import pojos.Patient;
 import pojos.Measurement; // Para el tipo de retorno en listados
@@ -231,13 +232,22 @@ public class PatientService {
         return out;
     }
 
+
+
     /**
      * Envía un REQUEST_APPOINTMENT al servidor.
      */
-    public static int requestAppointment(int doctorId, String datetimeIso, String message) throws IOException {
+   public static int requestAppointment(int doctorId, String datetimeIso, String message) throws IOException {
         if (currentPatient == null) {
             throw new IllegalStateException("Patient not logged in.");
         }
+       java.util.List<pojos.Appointment> appointments = listAppointmentsForDoctor(doctorId);
+        for (pojos.Appointment appointment : appointments) {
+            if(appointment.getDate().equals(datetimeIso)) {
+                throw new IllegalStateException("Appointment not available. Choose another hour or date.");
+            }
+        }
+
         JsonObject payload = new JsonObject();
         payload.addProperty("doctorId", doctorId);
         payload.addProperty("patientId", currentPatient.getId());
@@ -251,6 +261,50 @@ public class PatientService {
         }
         throw new IOException("Server did not return appointment ID.");
     }
+
+    public static java.util.List<pojos.Appointment> listAppointmentsForDoctor(int doctorId) throws IOException {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("doctorId", doctorId);
+
+        JsonObject pl = call("LIST_APPOINTMENTS", payload);
+
+        java.util.List<pojos.Appointment> out = new java.util.ArrayList<>();
+        if (pl.has("appointments") && pl.get("appointments").isJsonArray()) {
+            for (com.google.gson.JsonElement el : pl.getAsJsonArray("appointments")) {
+                JsonObject a = el.getAsJsonObject();
+                pojos.Appointment ap = new pojos.Appointment();
+                if (a.has("id")) ap.setId(a.get("id").getAsInt());
+                if (a.has("message")) ap.setMessage(a.get("message").getAsString());
+                ap.setDate(readLdt(a, "date", "dateTime"));
+
+                if (a.has("doctorId") && !a.get("doctorId").isJsonNull()) {
+                    pojos.Doctor d = new pojos.Doctor(); d.setId(a.get("doctorId").getAsInt()); ap.setDoctor(d);
+                } else { pojos.Doctor d = new pojos.Doctor(); d.setId(doctorId); ap.setDoctor(d); }
+
+                if (a.has("patientId") && !a.get("patientId").isJsonNull()) {
+                    pojos.Patient p = new pojos.Patient(); p.setId(a.get("patientId").getAsInt()); ap.setPatient(p);
+                }
+                out.add(ap);
+            }
+        }
+        return out;
+    }
+    /* Util para fechas, aceptando varios nombres de campo del server */
+    private static java.time.LocalDateTime readLdt(JsonObject o, String... keys) {
+        for (String k : keys) {
+            if (o.has(k) && !o.get(k).isJsonNull()) {
+                java.time.LocalDateTime dt = utilities.Utilities.parseDateTime(o.get(k).getAsString());
+                if (dt != null) return dt;
+            }
+        }
+        // fallback (date + hour)
+        if (o.has("date") && o.has("hour")) {
+            return utilities.Utilities.parseDateTime(o.get("date").getAsString() + "T" + o.get("hour").getAsString());
+        }
+        return null;
+    }
+
+
 
     /**
      * Envía un SEND_MESSAGE al doctor.
@@ -359,4 +413,5 @@ public class PatientService {
         call("SEND_MEASUREMENT", payload);
         return true; // Si no hay excepción, fue exitoso.
     }
+
 }

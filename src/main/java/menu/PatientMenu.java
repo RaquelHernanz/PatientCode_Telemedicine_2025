@@ -373,6 +373,7 @@ public class PatientMenu {
 
     }
 
+
     private static void recordECGorEDA() {
         if (PatientService.getCurrentPatient() == null) {
             System.out.println("You must log in first.");

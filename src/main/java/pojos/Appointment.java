@@ -23,6 +23,9 @@ public class Appointment {
         this.doctor = doctor;
         this.patient = patient;
     }
+    public Appointment(){
+
+    }
 
     public int getId(){
         return id;
