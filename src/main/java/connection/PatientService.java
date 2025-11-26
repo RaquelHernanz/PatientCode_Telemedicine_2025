@@ -3,10 +3,7 @@ package connection;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray; // Necesario para enviar List<Integer> de mediciones
-import pojos.Appointment;
-import pojos.Doctor;
-import pojos.Patient;
-import pojos.Measurement; // Para el tipo de retorno en listados
+import pojos.*;
 import utilities.Utilities;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -165,6 +162,11 @@ public class PatientService {
                 // teléfono: OJO -> ahora la clave es "phone"
                 if (respPayload.has("phone") && !respPayload.get("phone").isJsonNull()) {
                     patient.setPhonenumber(respPayload.get("phone").getAsString());
+                }
+                // teléfono: OJO -> ahora la clave es "phone"
+                if (respPayload.has("sex") && !respPayload.get("sex").isJsonNull()) {
+                    Sex sex1 = Sex.valueOf(respPayload.get("sex").getAsString());
+                    patient.setSex(sex1);
                 }
 
                 Doctor doctor = new Doctor();
