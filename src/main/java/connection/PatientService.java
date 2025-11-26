@@ -317,7 +317,7 @@ public class PatientService {
                 pojos.Appointment ap = new pojos.Appointment();
                 if (a.has("id")) ap.setId(a.get("id").getAsInt());
                 if (a.has("message")) ap.setMessage(a.get("message").getAsString());
-                ap.setDate(readLdt(a, "date", "dateTime"));
+                ap.setDate(readLdt(a, "date", "datetime"));
 
                 if (a.has("doctorId") && !a.get("doctorId").isJsonNull()) {
                     pojos.Doctor d = new pojos.Doctor(); d.setId(a.get("doctorId").getAsInt()); ap.setDoctor(d);
@@ -341,7 +341,7 @@ public class PatientService {
         }
         // fallback (date + hour)
         if (o.has("date") && o.has("hour")) {
-            return utilities.Utilities.parseDateTime(o.get("date").getAsString() + "T" + o.get("hour").getAsString());
+            return utilities.Utilities.parseDateTime("Date: " + o.get("date").getAsString() + " Time: " + o.get("hour").getAsString());
         }
         return null;
     }
