@@ -71,7 +71,7 @@ public class PatientMenu {
         }
     }
 
-    // EN menu/PatientMenu.java (Reemplazar el método registerPatient existente)
+    // EN menu/PatientMenu.java (Reemplazar el métdo registerPatient existente)
 
     private static void registerPatient() {
         System.out.println();
@@ -370,9 +370,7 @@ public class PatientMenu {
             System.out.println("ERROR requesting appointment: " + e.getMessage());
             Connection.releaseResources();
         }
-
     }
-
 
     private static void recordECGorEDA() {
         if (PatientService.getCurrentPatient() == null) {
