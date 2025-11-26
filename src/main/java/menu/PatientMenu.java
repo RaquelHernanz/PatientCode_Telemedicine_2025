@@ -515,6 +515,7 @@ public class PatientMenu {
 
             //Mac Address del Bitalino
             //Pablo: "20:17:11:20:52:36"
+            //Raquel: "20:17:11:20:52:32"
             String macAddress = Utilities.readString("Enter MAC address for Bitalino: ");
 
             int SamplingRate = 1000;
