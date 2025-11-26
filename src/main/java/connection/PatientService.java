@@ -116,7 +116,7 @@ public class PatientService {
      */
     public static Patient login(String email, String password) throws IOException {
         ensureConnected();
-        String requestId = "pat-login-" + System.currentTimeMillis();
+        String requestId = "pat-login-" + System.currentTimeMillis(); //??????????
 
         // 1. Construir Payload
         JsonObject payload = new JsonObject();
@@ -134,7 +134,7 @@ public class PatientService {
 
         // 3. Enviar y Leer Respuesta
         String jsonRequest = gson.toJson(request);
-        String jsonResponse = Connection.sendAndRead(jsonRequest);
+        String jsonResponse = Connection.sendAndRead(jsonRequest); // envia al server el request de log in
 
         if (jsonResponse == null) {
             throw new IOException("No response from server.");
@@ -152,8 +152,47 @@ public class PatientService {
                 Patient patient = new Patient();
                 patient.setId(respPayload.get("userId").getAsInt());
                 patient.setEmail(email);
+                // nombre y apellidos
+                if (respPayload.has("name") && !respPayload.get("name").isJsonNull()) {
+                    patient.setName(respPayload.get("name").getAsString());
+                }
+                if (respPayload.has("surname") && !respPayload.get("surname").isJsonNull()) {
+                    patient.setSurname(respPayload.get("surname").getAsString());
+                }
+                if (respPayload.has("dob") && !respPayload.get("dob").isJsonNull()) {
+                    patient.setDob(respPayload.get("dob").getAsString());
+                }
+                // teléfono: OJO -> ahora la clave es "phone"
+                if (respPayload.has("phone") && !respPayload.get("phone").isJsonNull()) {
+                    patient.setPhonenumber(respPayload.get("phone").getAsString());
+                }
+
+                Doctor doctor = new Doctor();
+
+                if (respPayload.has("doctor_id") && !respPayload.get("doctor_id").isJsonNull()) {
+                    doctor.setId(respPayload.get("doctor_id").getAsInt()); // el doctor_id lo tiene asignado el paciente que hace log in
+                }
+                if (respPayload.has("doctorName") && !respPayload.get("doctorName").isJsonNull()) {
+                    doctor.setName(respPayload.get("doctorName").getAsString());
+                }
+                if (respPayload.has("doctorSurname") && !respPayload.get("doctorSurname").isJsonNull()) {
+                    doctor.setSurname(respPayload.get("doctorSurname").getAsString());
+                }
+                if (respPayload.has("doctorEmail") && !respPayload.get("doctorEmail").isJsonNull()) {
+                    doctor.setEmail(respPayload.get("doctorEmail").getAsString());
+                }
+                if (respPayload.has("doctorPhone") && !respPayload.get("doctorPhone").isJsonNull()) {
+                    doctor.setPhonenumber(respPayload.get("doctorPhone").getAsString());
+                }
+
+                if (doctor == null) {
+                    throw new IOException("No doctor assigned to patient before registration.");
+                }
+
                 currentPatient = patient;
-                //System.out.println("doctor del paciente" + currentPatient.getDoctor());
+                currentPatient.setDoctor(doctor);
+                System.out.println("datos del paciente: " + currentPatient);
+                System.out.println("doctor del paciente: " + currentPatient.getDoctor());
                 return patient;
             }
         }

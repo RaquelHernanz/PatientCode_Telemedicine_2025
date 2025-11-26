@@ -111,7 +111,7 @@ public class PatientMenu {
             Connection.releaseResources();
         }
     }
-    // EN menu/PatientMenu.java (Reemplazar el método login existente)
+    // EN menu/PatientMenu.java (Reemplazar el métdo login existente)
 
     private static void login() {
         System.out.println();
