@@ -153,6 +153,7 @@ public class PatientService {
                 patient.setId(respPayload.get("userId").getAsInt());
                 patient.setEmail(email);
                 currentPatient = patient;
+                //System.out.println("doctor del paciente" + currentPatient.getDoctor());
                 return patient;
             }
         }
