@@ -144,7 +144,7 @@ public class PatientMenu {
                 selectedDoctor = p.getDoctor();
             }*/
             selectedDoctor = p.getDoctor();
-            System.out.println(p.getDoctor().getName() + " logged in successfully.");
+            //System.out.println(p.getDoctor().getName() + " logged in successfully.");
                 // Si el login fue exitoso, el paciente ya debería tener un doctor asociado.
                 // Aquí deberías cargar la información completa del doctor del paciente desde el servidor,
                 // pero por simplicidad, asumiremos que si p!=null, el login funciona.

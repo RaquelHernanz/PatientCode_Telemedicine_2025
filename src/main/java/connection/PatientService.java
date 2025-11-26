@@ -193,8 +193,8 @@ public class PatientService {
 
                 currentPatient = patient;
                 currentPatient.setDoctor(doctor);
-                System.out.println("datos del paciente: " + currentPatient);
-                System.out.println("doctor del paciente: " + currentPatient.getDoctor());
+                //System.out.println("datos del paciente: " + currentPatient);
+                //System.out.println("doctor del paciente: " + currentPatient.getDoctor());
                 return patient;
             }
         }
