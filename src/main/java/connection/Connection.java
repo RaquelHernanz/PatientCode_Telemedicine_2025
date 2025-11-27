@@ -1,6 +1,8 @@
 package connection;
 
 
+import utilities.Utilities;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,8 +21,9 @@ public class Connection {
     // establecer la conexión al servidor
     public static void connectToServer() throws IOException { //si el servidor no está encendido entonces se lanza IOException
         if (socket == null || socket.isClosed()) { // si ya hay una conexión activa no se crea otro socket
+            String serverIp = Utilities.readString("Enter the IP address of the server:");
             System.out.println("Connecting to server...");
-            socket = new Socket("10.60.115.244", 9000); // para crear el socket, y conectarse al server.
+            socket = new Socket(serverIp, 9000); // para crear el socket, y conectarse al server.
             // Habría que cambiar el localhost por el ip del server. LocalHost es mi propio ordenador
             printWriter = new PrintWriter(socket.getOutputStream(), true); // envía texto al servidor, cada linea se envía inmediatamnte sin esperar a llenar el buffer
             bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream())); // lee el texto que le envía el servidor
