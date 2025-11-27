@@ -347,7 +347,6 @@ public class PatientService {
     }
 
 
-
     /**
      * Envía un SEND_MESSAGE al doctor.
      */
