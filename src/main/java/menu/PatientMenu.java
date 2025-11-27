@@ -198,6 +198,7 @@ public class PatientMenu {
                 case "4" -> requestAppointment(); // <-- LLAMADA AL NUEVO MÉTDO
                 case "5" -> recordECGorEDA();
                 case "6" -> logged.viewPersonalInfo();
+                case "7" -> viewAppointments(logged);
                 default -> System.out.println("Invalid option. Try again.");
             }
         }
@@ -570,6 +571,35 @@ public class PatientMenu {
             }
         }
         return data;
+    }
+
+    private static void viewAppointments(Patient patient){
+        try {
+            // Pedimos al servidor las citas del doctor
+            java.util.List<Appointment> appointments = PatientService.listAppointmentsForPatient(patient.getId());
+
+            if (appointments == null || appointments.isEmpty()) {
+                System.out.println("You have no appointments.");
+                return;
+            }
+
+            System.out.println("\n=== Appointments ===");
+            for (Appointment ap : appointments) {
+                //    System.out.println("ID: " + ap.getId());
+                if (ap.getDate() != null) {
+                    System.out.println("Date/Time:  " + ap.getDate());
+                }
+                if (ap.getPatient() != null) {
+                    System.out.println("Patient ID:  " + ap.getPatient().getId());
+                }
+                System.out.println("Message:  " + ap.getMessage());
+                System.out.println("------------------------------");
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error while retrieving appointments: " + e.getMessage());
+        }
+
     }
 
 
