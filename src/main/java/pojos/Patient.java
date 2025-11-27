@@ -180,4 +180,8 @@ public class Patient {
     public int hashCode() {
         return Objects.hash(id, name, surname, email, doctor, phonenumber, dob, sex, appointments, measurements, symptoms, messages);
     }
+
+    public void viewPersonalInfo(){
+        System.out.println(this.toString());
+    }
 }

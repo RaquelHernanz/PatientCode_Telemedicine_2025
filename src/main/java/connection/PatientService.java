@@ -186,13 +186,21 @@ public class PatientService {
                 if (respPayload.has("doctorPhone") && !respPayload.get("doctorPhone").isJsonNull()) {
                     doctor.setPhonenumber(respPayload.get("doctorPhone").getAsString());
                 }
-
                 if (doctor == null) {
                     throw new IOException("No doctor assigned to patient before registration.");
                 }
 
                 currentPatient = patient;
                 currentPatient.setDoctor(doctor);
+
+                ArrayList<Symptoms> symptoms = listSymptoms(patient.getId());
+                patient.setSymptoms(symptoms);
+                ArrayList<Measurement> measurements = listMeasurements(patient.getId());
+                patient.setMeasurements(measurements);
+                ArrayList<Appointment> appointments = listAppointmentsForPatient(patient.getId());
+                patient.setAppointments(appointments);
+                ArrayList<String> messages = listConversationWithPatient(doctor.getId(), patient.getId());
+                patient.setMessages(messages);
                 //System.out.println("datos del paciente: " + currentPatient);
                 //System.out.println("doctor del paciente: " + currentPatient.getDoctor());
                 return patient;
@@ -252,6 +260,35 @@ public class PatientService {
         throw new IOException("Send Symptoms failed: " + msg);
     }
 
+    public static java.util.ArrayList<pojos.Symptoms> listSymptoms(int patientId) throws IOException {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("patientId", patientId);
+
+        JsonObject pl = call("LIST_SYMPTOMS", payload); // llama a LIST_SYMPTOMS con los datos. pl es tdo el mensaje
+
+        java.util.ArrayList<pojos.Symptoms> out = new java.util.ArrayList<>(); // crea nuevo arrayList para almacenar sintomas
+        if (pl.has("symptoms") && pl.get("symptoms").isJsonArray()) { // si el JSON tiene sintomas
+            for (com.google.gson.JsonElement el : pl.getAsJsonArray("symptoms")) { // recorre JSON. El es cada sintoma (elemento)
+                JsonObject s = el.getAsJsonObject(); // s coge la información que contiene el. (cambia a objeto)
+                pojos.Symptoms sym = new pojos.Symptoms(); // creamos la lista de sintomas
+                if (s.has("symptomsId")) sym.setId(s.get("symptomsId").getAsInt());
+                if (s.has("description")) sym.setDescription(s.get("description").getAsString());
+                //sym.setDateTime(readLdt(s, "dateTime", "date_hour", "dateHour"));
+                /*String ts     = s.has("timestamp") ? s.get("timestamp").getAsString() : "";
+                java.time.LocalDateTime dt = utilities.Utilities.parseDateTime(ts);
+                sym.setDateTime(dt);*/
+                sym.setDateTime(readLdt(s, "date"));
+
+
+                pojos.Patient p = new pojos.Patient(); // crea el paciente
+                p.setId(patientId); // añade el id al paciente vacio para luego meter los sintomas y almacenarlos en el paciente
+                sym.setPatient(p); // mete los sintomas en el paciente
+                out.add(sym); // arraylist con los sintomas, se añaden los sintomas al array
+            }
+        }
+        return out;
+    }
+
     /**
      * Lista todos los doctores disponibles.
      * @return Lista de objetos Doctor (parciales: solo id, nombre, email).
@@ -274,7 +311,58 @@ public class PatientService {
         return out;
     }
 
+    public static ArrayList<String> listConversationWithPatient(int doctorId, int patientId) throws IOException {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("doctorId", doctorId);
+        payload.addProperty("patientId", patientId);
 
+        JsonObject pl = call("LIST_MESSAGES", payload);
+
+        ArrayList<String> messages = new ArrayList<>();
+        if (pl.has("messages") && pl.get("messages").isJsonArray()) {
+            for (com.google.gson.JsonElement el : pl.getAsJsonArray("messages")) {
+                JsonObject m = el.getAsJsonObject();
+                String sender = m.has("senderRole") ? m.get("senderRole").getAsString() : "?";
+                String text   = m.has("text") ? m.get("text").getAsString() : "";
+                String ts     = m.has("timestamp") ? m.get("timestamp").getAsString() : "";
+                messages.add("[" + ts + "] " + sender + ": " + text);
+            }
+        }
+        return messages;
+    }
+
+    public static ArrayList<Appointment> listAppointmentsForPatient(int patientId) throws IOException {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("patientId", patientId);
+
+        JsonObject pl = call("LIST_APPOINTMENTS", payload);
+
+        java.util.ArrayList<pojos.Appointment> out = new java.util.ArrayList<>();
+        if (pl.has("appointments") && pl.get("appointments").isJsonArray()) {
+            for (com.google.gson.JsonElement el : pl.getAsJsonArray("appointments")) {
+                JsonObject a = el.getAsJsonObject();
+                pojos.Appointment ap = new pojos.Appointment();
+                if (a.has("id")) ap.setId(a.get("id").getAsInt());
+                if (a.has("message")) ap.setMessage(a.get("message").getAsString());
+                //ap.setDate(readLdt(a, "date", "dateTime"));
+                /*String ts     = a.has("timestamp") ? a.get("timestamp").getAsString() : "";
+                java.time.LocalDateTime dt = utilities.Utilities.parseDateTime(ts);
+                ap.setDate(dt);*/
+                ap.setDate(readLdt(a, "datetime"));
+                //System.out.println(readLdt(a, "datetime"));
+
+                if (a.has("patientId") && !a.get("patientId").isJsonNull()) {
+                    pojos.Patient p = new pojos.Patient(); p.setId(a.get("patientId").getAsInt()); ap.setPatient(p);
+                } else { pojos.Patient p = new pojos.Patient(); p.setId(patientId); ap.setPatient(p); }
+
+                if (a.has("doctorId") && !a.get("doctorId").isJsonNull()) {
+                    pojos.Doctor d = new pojos.Doctor(); d.setId(a.get("doctorId").getAsInt()); ap.setDoctor(d);
+                }
+                out.add(ap);
+            }
+        }
+        return out;
+    }
 
     /**
      * Envía un REQUEST_APPOINTMENT al servidor.
@@ -327,6 +415,36 @@ public class PatientService {
                     pojos.Patient p = new pojos.Patient(); p.setId(a.get("patientId").getAsInt()); ap.setPatient(p);
                 }
                 out.add(ap);
+            }
+        }
+        return out;
+    }
+
+    public static java.util.ArrayList<pojos.Measurement> listMeasurements(int patientId) throws IOException {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("patientId", patientId);
+
+        JsonObject pl = call("LIST_MEASUREMENTS", payload);
+
+        java.util.ArrayList<pojos.Measurement> out = new java.util.ArrayList<>();
+        if (pl.has("measurements") && pl.get("measurements").isJsonArray()) {
+            for (com.google.gson.JsonElement el : pl.getAsJsonArray("measurements")) {
+                JsonObject m = el.getAsJsonObject();
+                pojos.Measurement mm = new pojos.Measurement();
+                if (m.has("id")) mm.setId(m.get("id").getAsInt());
+                if (m.has("type")) mm.setType(pojos.Measurement.Type.valueOf(m.get("type").getAsString().toUpperCase()));
+                mm.setDate(readLdt(m, "date", "dateTime"));
+                pojos.Patient p = new pojos.Patient(); p.setId(patientId);
+                mm.setPatient(p);
+
+                // values puede no venir en listados (para no enviar arrays grandes)
+                if (m.has("values") && m.get("values").isJsonArray()) {
+                    java.util.ArrayList<Integer> values = new java.util.ArrayList<>();
+                    for (com.google.gson.JsonElement vi : m.getAsJsonArray("values")) values.add(vi.getAsInt());
+                    mm.setValues(values);
+                }
+
+                out.add(mm);
             }
         }
         return out;

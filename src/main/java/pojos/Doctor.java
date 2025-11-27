@@ -104,14 +104,14 @@ public class Doctor {
     @Override
     public String toString() {
         return "Doctor{" +
-                "appointments=" + appointments +
-                ", id=" + id +
+        //        "appointments=" + appointments +
+                " id=" + id +
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
                 ", email='" + email + '\'' +
                 ", phonenumber='" + phonenumber + '\'' +
-                ", patients=" + patients +
-                ", messages=" + messages +
+       //         ", patients=" + patients +
+        //        ", messages=" + messages +
                 '}';
     }
 

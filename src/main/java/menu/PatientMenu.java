@@ -178,6 +178,8 @@ public class PatientMenu {
             System.out.println("3. Send message to assigned doctor");
             System.out.println("4. Request appointment");
             System.out.println("5. Record ECG/EDA (Bitalino)");
+            System.out.println("6. View my personal information");
+            System.out.println("7. View appointments");
 
             System.out.print("Choose an option: ");
 
@@ -193,8 +195,9 @@ public class PatientMenu {
                 case "1" -> sendSymptoms(); // <-- CAMBIO DE NOMBRE: writeSymptoms -> sendSymptoms
                 case "2" -> viewMessagesWithDoctor();
                 case "3" -> sendMessage();
-                case "4" -> requestAppointment(); // <-- LLAMADA AL NUEVO MÉTODO
+                case "4" -> requestAppointment(); // <-- LLAMADA AL NUEVO MÉTDO
                 case "5" -> recordECGorEDA();
+                case "6" -> logged.viewPersonalInfo();
                 default -> System.out.println("Invalid option. Try again.");
             }
         }
@@ -566,7 +569,8 @@ public class PatientMenu {
                 Logger.getLogger(PatientMenu.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
         return data;
     }
+
+
 }

@@ -15,6 +15,8 @@ public class Symptoms {
         this.patient = patient;
     }
 
+    public Symptoms() {}
+
     public Symptoms(int id, String description, LocalDateTime date_hour, Patient patient){
         this.id = id;
         this.description = description;
@@ -57,7 +59,7 @@ public class Symptoms {
     @Override
     public String toString() {
         return "Symptoms{" +
-                "dateTime=" + dateTime +
+                "Date/Time=" + dateTime +
                 ", id=" + id +
                 ", description='" + description + '\'' +
                 ", patient=" + patient +

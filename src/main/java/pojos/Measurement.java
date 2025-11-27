@@ -17,6 +17,9 @@ public class Measurement {
         this.date = date;
         this.patient = patient;
     }
+
+    public Measurement(){}
+
     public Measurement(int id, Type type, List<Integer> values, LocalDateTime date, Patient patient){
         this.id = id;
         this.type = type;
