@@ -526,7 +526,7 @@ public class PatientMenu {
             bitalino.open(macAddress, SamplingRate);
 
             // Empieza la adquisición en el canal analógico A3
-            int[] channelsToAcquire = {1}; //A3 es el canal 2 de EDA
+            int[] channelsToAcquire = {2}; //A3 es el canal 2 de EDA
             bitalino.start(channelsToAcquire);
 
             //Lee 10000 samples en total, 10 segundos a 1000 Hz
