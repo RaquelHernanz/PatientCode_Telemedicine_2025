@@ -1,5 +1,7 @@
 package pojos;
 
+import utilities.Utilities;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -182,6 +184,16 @@ public class Patient {
     }
 
     public void viewPersonalInfo(){
-        System.out.println(this.toString());
+        if (this != null) { // si existe el paciente muestra sus datos
+            System.out.println("PATIENTS INFORMATION: \n");
+            System.out.println("\n Name: " + this.getName());
+            System.out.println("\n Surname: " + this.getSurname());
+            System.out.println("\n Email: " + this.getEmail());
+            System.out.println("\n Date of Birth: " + this.getDob());
+            System.out.println("\n Sex: " + Utilities.returnSexString(this.getSex()));
+            System.out.println("\n Phone Number: " + this.getPhonenumber());
+        } else{
+            System.out.println("An error has occurred.");
+        }
     }
 }
