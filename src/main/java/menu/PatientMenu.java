@@ -6,7 +6,11 @@ import BITalino.BITalinoException;
 import pojos.*;
 import connection.PatientService;
 import connection.Connection;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.IOException;
@@ -358,13 +362,23 @@ public class PatientMenu {
         System.out.println("--- Request Appointment with Dr. " + selectedDoctor.getSurname() + " ---");
 
         boolean repeated;
-        do{
+        do {
             // Recoger Fecha y Hora
-            String date = utilities.Utilities.obtainDate("Appointment Date");
-            String time = utilities.Utilities.readString("Appointment Time (HH:mm): ");
-
+            boolean dateTimeOk;
+            String date;
+            String time;
+            do{
+                date = utilities.Utilities.obtainDate("Appointment Date");
+                time = utilities.Utilities.readString("Appointment Time (HH:mm): ");
+                dateTimeOk = Utilities.validateDateTime(date, time);
+                if (!dateTimeOk) {
+                    System.out.println("Please enter a valid date and time: ");
+                }
+            }
+            while(!dateTimeOk);
             // Formato requerido por el servidor: YYYY-MM-DDTHH:mm:ss
             String datetimeIso = date + "T" + time + ":00";
+            System.out.println(datetimeIso);
 
             String message = utilities.Utilities.readString("Reason for the appointment: ");
 
@@ -381,6 +395,7 @@ public class PatientMenu {
         }
         while (repeated);
     }
+
 
     private static void recordECGorEDA() {
         if (PatientService.getCurrentPatient() == null) {

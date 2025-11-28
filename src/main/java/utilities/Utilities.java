@@ -205,4 +205,19 @@ public class Utilities {
         frame.setVisible(true);
     }
 
+    public static boolean validateDateTime(String date, String time) {
+        try {
+            LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        } catch (Exception e) {
+            return false;
+        }
+        try {
+            LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+
+    }
+
 }
