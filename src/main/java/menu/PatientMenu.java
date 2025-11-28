@@ -357,23 +357,29 @@ public class PatientMenu {
         System.out.println();
         System.out.println("--- Request Appointment with Dr. " + selectedDoctor.getSurname() + " ---");
 
-        // Recoger Fecha y Hora
-        String date = utilities.Utilities.obtainDate("Appointment Date");
-        String time = utilities.Utilities.readString("Appointment Time (HH:mm): ");
+        boolean repeated;
+        do{
+            // Recoger Fecha y Hora
+            String date = utilities.Utilities.obtainDate("Appointment Date");
+            String time = utilities.Utilities.readString("Appointment Time (HH:mm): ");
 
-        // Formato requerido por el servidor: YYYY-MM-DDTHH:mm:ss
-        String datetimeIso = date + "T" + time + ":00";
+            // Formato requerido por el servidor: YYYY-MM-DDTHH:mm:ss
+            String datetimeIso = date + "T" + time + ":00";
 
-        String message = utilities.Utilities.readString("Reason for the appointment: ");
+            String message = utilities.Utilities.readString("Reason for the appointment: ");
 
-        // Llamada al servicio
-        try {
-            int appointmentId = PatientService.requestAppointment(selectedDoctor.getId(), datetimeIso, message);
-            System.out.println("Appointment requested successfully. ID: " + appointmentId);
-        } catch (IOException e) {
-            System.out.println("ERROR requesting appointment: " + e.getMessage());
-            Connection.releaseResources();
+            // Llamada al servicio
+            try {
+                int appointmentId = PatientService.requestAppointment(selectedDoctor.getId(), datetimeIso, message);
+                System.out.println("Appointment requested successfully. ID: " + appointmentId);
+                repeated = false;
+            } catch (IOException e) {
+                System.out.println("ERROR requesting appointment: " + e.getMessage());
+            //    Connection.releaseResources();
+                repeated = true;
+            }
         }
+        while (repeated);
     }
 
     private static void recordECGorEDA() {
