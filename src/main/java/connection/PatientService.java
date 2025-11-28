@@ -407,7 +407,7 @@ public class PatientService {
                 if (a.has("id")) ap.setId(a.get("id").getAsInt());
                 if (a.has("message")) ap.setMessage(a.get("message").getAsString());
                 ap.setDate(readLdt(a, "date", "datetime"));
-                System.out.println(readLdt(a, "date", "datetime"));
+                //System.out.println(readLdt(a, "date", "datetime"));
 
                 if (a.has("doctorId") && !a.get("doctorId").isJsonNull()) {
                     pojos.Doctor d = new pojos.Doctor(); d.setId(a.get("doctorId").getAsInt()); ap.setDoctor(d);

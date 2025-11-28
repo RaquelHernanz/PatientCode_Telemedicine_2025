@@ -378,7 +378,7 @@ public class PatientMenu {
             while(!dateTimeOk);
             // Formato requerido por el servidor: YYYY-MM-DDTHH:mm:ss
             String datetimeIso = date + "T" + time + ":00";
-            System.out.println(datetimeIso);
+            //System.out.println(datetimeIso);
 
             String message = utilities.Utilities.readString("Reason for the appointment: ");
 
