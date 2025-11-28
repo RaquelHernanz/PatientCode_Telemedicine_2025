@@ -185,13 +185,13 @@ public class Patient {
 
     public void viewPersonalInfo(){
         if (this != null) { // si existe el paciente muestra sus datos
-            System.out.println("PATIENTS INFORMATION: \n");
-            System.out.println("\n Name: " + this.getName());
-            System.out.println("\n Surname: " + this.getSurname());
-            System.out.println("\n Email: " + this.getEmail());
-            System.out.println("\n Date of Birth: " + this.getDob());
-            System.out.println("\n Sex: " + Utilities.returnSexString(this.getSex()));
-            System.out.println("\n Phone Number: " + this.getPhonenumber());
+            System.out.println("PATIENTS INFORMATION: ");
+            System.out.println(" Name: " + this.getName());
+            System.out.println(" Surname: " + this.getSurname());
+            System.out.println(" Email: " + this.getEmail());
+            System.out.println(" Date of Birth: " + this.getDob());
+            System.out.println(" Sex: " + Utilities.returnSexString(this.getSex()));
+            System.out.println(" Phone Number: " + this.getPhonenumber());
         } else{
             System.out.println("An error has occurred.");
         }
