@@ -75,7 +75,6 @@ public class PatientMenu {
         }
     }
 
-    // EN menu/PatientMenu.java (Reemplazar el métdo registerPatient existente)
 
     private static void registerPatient() {
         System.out.println();

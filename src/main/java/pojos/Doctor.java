@@ -135,21 +135,4 @@ public class Doctor {
         }
     }
 
-    //Function that searches for a patient associated to the doctor by its id
-    public Patient searchPatientById(){
-        this.showPatientsAndIds();
-        int id = Utilities.readInt("Enter the ID of the patient: ");
-
-        for (Object patientObj : patients) {
-            Patient patient = (Patient) patientObj;
-            if (patient.getId() == id) {
-                return patient;
-            }
-        }
-        return null; // Return null if no patient with the given ID is found
-    }
-
-    public void viewPersonalInformation (){
-        System.out.println(this.toString());
-    }
 }
