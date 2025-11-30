@@ -86,7 +86,14 @@ public class PatientMenu {
         String password = scanner.nextLine().trim();
         String name = utilities.Utilities.readString("Name: ");
         String surname = utilities.Utilities.readString("Surname: ");
-        String phone = utilities.Utilities.readString("Phone Number: ");
+        String phone;
+        do {
+            phone= Utilities.readString("Phone number: ");
+
+            if (!Utilities.validatePhone(phone)){ // comprueba si el número es correcto
+                System.out.println("Invalid phonenumber. Please try again. ");
+            }
+        } while (!Utilities.validatePhone(phone));
         pojos.Sex sex = utilities.Utilities.readSex("Sex (M/F/O): ");
         String dob = utilities.Utilities.obtainDate("Date of Birth: ");
 

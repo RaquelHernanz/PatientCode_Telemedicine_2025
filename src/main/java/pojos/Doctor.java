@@ -17,6 +17,7 @@ public class Doctor {
 
     public Doctor (){}
     public Doctor(String name, String surname, String email, String phonenumber, ArrayList <Patient> patients, ArrayList <Appointment> appointments,  ArrayList <String> messages) {
+        super();
         this.name = name;
         this.surname = surname;
         this.phonenumber = phonenumber;
@@ -27,6 +28,7 @@ public class Doctor {
     }
 
     public Doctor(int id, String name, String surname, String phonenumber,String email, ArrayList <Patient> patients, ArrayList <Appointment> appointments, ArrayList <String> messages) {
+        super();
         this.id = id;
         this.name = name;
         this.surname = surname;

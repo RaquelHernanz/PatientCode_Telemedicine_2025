@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"BITalino"},{"l":"connection"},{"l":"menu"},{"l":"pojos"},{"l":"utilities"}];updateSearchResults();

@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList; // Para construir listas
 
-
-
 /**
  * Gestiona la comunicación con el servidor para el cliente Paciente[cite: 33].
  */
@@ -273,10 +271,6 @@ public class PatientService {
                 pojos.Symptoms sym = new pojos.Symptoms(); // creamos la lista de sintomas
                 if (s.has("symptomsId")) sym.setId(s.get("symptomsId").getAsInt());
                 if (s.has("description")) sym.setDescription(s.get("description").getAsString());
-                //sym.setDateTime(readLdt(s, "dateTime", "date_hour", "dateHour"));
-                /*String ts     = s.has("timestamp") ? s.get("timestamp").getAsString() : "";
-                java.time.LocalDateTime dt = utilities.Utilities.parseDateTime(ts);
-                sym.setDateTime(dt);*/
                 sym.setDateTime(readLdt(s, "date"));
 
 

@@ -11,17 +11,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-
-import javax.swing.JFrame;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 public class Utilities {
 
     // ========= Entrada por consola =========
@@ -32,7 +21,7 @@ public class Utilities {
         return scanner.nextLine();
     }
 
-    // Variante que devuelve el email validado.
+    // Devuelve el email validado.
     public static String obtainEmail() {
         final String pattern = "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$";
         while (true) {
@@ -43,7 +32,7 @@ public class Utilities {
         }
     }
 
-    // Variante interactiva: pide hasta que sea válido y devuelve el String.
+    // Pide hasta que sea válido y devuelve el String.
     public static String obtainDate(String label) {
         final String datePattern = "\\d{4}-\\d{2}-\\d{2}";
         while (true) {
@@ -54,16 +43,13 @@ public class Utilities {
         }
     }
 
-    // ========= Sí/No y rango =========
-    public static boolean obtainYesNo(String label) {
-        while (true) {
-            System.out.print(label + " (y/n): ");
-            String s = scanner.nextLine().trim().toLowerCase(Locale.ROOT);
-            if (s.equals("y")) return true;
-            if (s.equals("n")) return false;
-            System.out.println("Please enter y or n.");
-        }
+    //Validación del teléfono
+    public static boolean validatePhone(String phone) {
+        if (phone == null) return false;
+        String cleaned = phone.replaceAll("[\\s-]", "");
+        return cleaned.matches("^\\+?[0-9]{9,15}$");
     }
+
 
     // ========= Sex =========
     public static Sex readSex(String prompt) {

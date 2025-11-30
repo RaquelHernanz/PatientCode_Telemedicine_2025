@@ -22,6 +22,7 @@ public class Patient {
     public Patient (){}
 
     public Patient(String name, String surname, String email, String phonenumber,Sex sex,String dob, ArrayList <Appointment> appointments, ArrayList <Measurement> measurements, ArrayList <Symptoms> symptoms, Doctor doctor, ArrayList<String> messages) {
+        super();
         this.name = name;
         this.surname = surname;
         this.email = email;
@@ -36,6 +37,7 @@ public class Patient {
     }
 
     public Patient(int id, String name, String surname, String email, Sex sex, String phonenumber, String dob, ArrayList <Appointment> appointments, ArrayList <Measurement> measurements, ArrayList <Symptoms> symptoms,Doctor doctor, ArrayList <String> messages){
+        super();
         this.id = id;
         this.name = name;
         this.surname = surname;
