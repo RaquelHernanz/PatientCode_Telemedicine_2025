@@ -334,8 +334,8 @@ public class PatientService {
         java.util.ArrayList<pojos.Appointment> out = new java.util.ArrayList<>();
         if (pl.has("appointments") && pl.get("appointments").isJsonArray()) {
             for (com.google.gson.JsonElement el : pl.getAsJsonArray("appointments")) {
-                JsonObject a = el.getAsJsonObject();
-                pojos.Appointment ap = new pojos.Appointment();
+                JsonObject a = el.getAsJsonObject(); // cada cita del array de citas
+                pojos.Appointment ap = new pojos.Appointment(); // crea el objeto appointment que está en los atributos del paciente
                 if (a.has("id")) ap.setId(a.get("id").getAsInt());
                 if (a.has("message")) ap.setMessage(a.get("message").getAsString());
                 //ap.setDate(readLdt(a, "date", "dateTime"));
@@ -345,14 +345,18 @@ public class PatientService {
                 ap.setDate(readLdt(a, "datetime"));
                 //System.out.println(readLdt(a, "datetime"));
 
-                if (a.has("patientId") && !a.get("patientId").isJsonNull()) {
-                    pojos.Patient p = new pojos.Patient(); p.setId(a.get("patientId").getAsInt()); ap.setPatient(p);
+                if (a.has("patientId") && !a.get("patientId").isJsonNull()) { // el objeto appointment tiene como atributo el paciente
+                    pojos.Patient p = new pojos.Patient(); // crea el paciente
+                    p.setId(a.get("patientId").getAsInt()); // le asigna el id al paciente
+                    ap.setPatient(p); // le asigna el paciente a la appointment para tener registrada la cita a que paciente corresponde
                 } else { pojos.Patient p = new pojos.Patient(); p.setId(patientId); ap.setPatient(p); }
 
-                if (a.has("doctorId") && !a.get("doctorId").isJsonNull()) {
-                    pojos.Doctor d = new pojos.Doctor(); d.setId(a.get("doctorId").getAsInt()); ap.setDoctor(d);
+                if (a.has("doctorId") && !a.get("doctorId").isJsonNull()) { // el objeto appointment tiene como atributo al doctor
+                    pojos.Doctor d = new pojos.Doctor();
+                    d.setId(a.get("doctorId").getAsInt()); // lo mismo que con el paciente, el objeto appointment tiene un doctor asociado
+                    ap.setDoctor(d); // asigna el doctor a la cita
                 }
-                out.add(ap);
+                out.add(ap); // añade al array de apointments la apointment
             }
         }
         return out;

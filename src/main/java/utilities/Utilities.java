@@ -11,6 +11,17 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
+import javax.swing.JFrame;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class Utilities {
 
     // ========= Entrada por consola =========
@@ -21,7 +32,52 @@ public class Utilities {
         return scanner.nextLine();
     }
 
-    // Devuelve el email validado.
+
+    public static int readInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Debes ingresar un número entero.");
+            }
+        }
+    }
+
+    public static float readFloat(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            try {
+                return Float.parseFloat(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Debes ingresar un número decimal válido.");
+            }
+        }
+    }
+
+    public static int readId(String prompt) {
+        while (true) {
+            int id = readInt(prompt);
+            if (id > 0) return id;
+            System.out.println("Error: El ID debe ser un número positivo.");
+        }
+    }
+
+    // ========= Email =========
+    // Mantiene la firma original: bloquea hasta que el email es válido y devuelve true.
+    public static boolean readEmail(String prompt) {
+        final String emailPattern = "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$";
+        while (true) {
+            System.out.print(prompt);
+            String email = scanner.nextLine().trim();
+            if (Pattern.matches(emailPattern, email)) return true;
+            System.out.println("Error: Ingresa un email válido (ej: usuario@dominio.com).");
+        }
+    }
+
+    // Variante que devuelve el email validado.
     public static String obtainEmail() {
         final String pattern = "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$";
         while (true) {
@@ -32,7 +88,26 @@ public class Utilities {
         }
     }
 
-    // Pide hasta que sea válido y devuelve el String.
+    // Validador “puro” (sin I/O) por si lo necesitas en lógica no interactiva.
+    public static boolean validateEmail(String email) {
+        if (email == null) return false;
+        return email.trim().matches("^[\\w.+-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$");
+    }
+
+    // ========= Teléfono =========
+    public static boolean validatePhone(String phone) {
+        if (phone == null) return false;
+        String cleaned = phone.replaceAll("[\\s-]", "");
+        return cleaned.matches("^\\+?[0-9]{9,15}$");
+    }
+
+    // ========= Fecha de nacimiento (yyyy-MM-dd) =========
+    // Versión “pura”: devuelve true/false (sin bucles infinitos).
+    public static boolean validateDateOfBirth(String dobYYYYMMDD) {
+        return dobYYYYMMDD != null && dobYYYYMMDD.matches("\\d{4}-\\d{2}-\\d{2}");
+    }
+
+    // Variante interactiva: pide hasta que sea válido y devuelve el String.
     public static String obtainDate(String label) {
         final String datePattern = "\\d{4}-\\d{2}-\\d{2}";
         while (true) {
@@ -43,13 +118,28 @@ public class Utilities {
         }
     }
 
-    //Validación del teléfono
-    public static boolean validatePhone(String phone) {
-        if (phone == null) return false;
-        String cleaned = phone.replaceAll("[\\s-]", "");
-        return cleaned.matches("^\\+?[0-9]{9,15}$");
+    // ========= Sí/No y rango =========
+    public static boolean obtainYesNo(String label) {
+        while (true) {
+            System.out.print(label + " (y/n): ");
+            String s = scanner.nextLine().trim().toLowerCase(Locale.ROOT);
+            if (s.equals("y")) return true;
+            if (s.equals("n")) return false;
+            System.out.println("Please enter y or n.");
+        }
     }
 
+    public static int obtainIntInRange(String label, int min, int max) {
+        while (true) {
+            System.out.print(label + " (" + min + "-" + max + "): ");
+            String input = scanner.nextLine().trim();
+            try {
+                int value = Integer.parseInt(input);
+                if (value >= min && value <= max) return value;
+            } catch (NumberFormatException ignored) {}
+            System.out.println("Please enter a number between " + min + " and " + max + ".");
+        }
+    }
 
     // ========= Sex =========
     public static Sex readSex(String prompt) {
@@ -84,6 +174,35 @@ public class Utilities {
         if (s == null || s.isEmpty()) return null;
         try { return LocalDateTime.parse(s, ISO_DT); }
         catch (DateTimeParseException e) { return null; }
+    }
+
+
+
+    //TODO Esto se puede borrar
+    //Para representar gráficas a partir de un Double[]
+    public static void showChartFromArray(Double[] data, String title) {
+        XYSeries series = new XYSeries("Data");
+        for(int i = 0; i < data.length; i++) {
+            series.add(i, data[i]);
+        }
+
+        XYSeriesCollection dataset = new XYSeriesCollection(series);
+
+        JFreeChart chart = ChartFactory.createXYLineChart(
+                title,
+                "Tiempo (s)",
+                "Valor",
+                dataset
+        );
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+
+        JFrame frame = new JFrame("Gráfica "+title);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setContentPane(chartPanel);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
     public static boolean validateDateTime(String date, String time) {
