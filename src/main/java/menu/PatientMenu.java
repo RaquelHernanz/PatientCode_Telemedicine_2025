@@ -404,19 +404,19 @@ public class PatientMenu {
 
 
     private static void recordECGorEDA() {
-        if (PatientService.getCurrentPatient() == null) {
+        if (PatientService.getCurrentPatient() == null) {//Se asegura q hay un paciente
             System.out.println("You must log in first.");
             return;
         }
-        if (selectedDoctor == null) {
+        if (selectedDoctor == null) {//Se asegura q hay un doctor
             System.out.println("You must have an assigned doctor.");
             return;
         }
         System.out.println("Select 1 for ECG or 2 for EDA");
         //Se le pide al paciente que elija
-        String input = scanner.nextLine().trim();
+        String input = scanner.nextLine().trim();//Elige entre ECG o EDA
         //Si el input no es 1 o 2 se le vuelve a pedir
-        while(!input.equals("1") && !input.equals("2")){
+        while(!input.equals("1") && !input.equals("2")){//Se asegura q el input sea 1 o 2
             System.out.println("Invalid option. Select 1 for ECG or 2 for EDA");
             input = scanner.nextLine().trim();
         }
@@ -491,6 +491,7 @@ public class PatientMenu {
                                             //son de 10 muestras.
 
                 //Cada vez lee un bloque de 10 samples
+                //En nuestro caso serán 1000 bloques de 10 muestras cada uno, lo q serían 10000 muestras en total
                 int block_size=10;
                 frame = bitalino.read(block_size);
 
@@ -504,6 +505,8 @@ public class PatientMenu {
                 //Almacena los datos en el array
                 for (int i = 0; i < frame.length; i++) {
                     data.add(frame[i].analog[0]); //Valor recogido
+
+
 
                 }
             }
